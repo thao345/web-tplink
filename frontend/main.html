@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>广部管理系统 | Hệ Thống Quản Lý Nhà Máy</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+
+<style>
+  :root {
+    --primary: #1565C0;
+    --primary-dark: #0D47A1;
+    --primary-light: #1976D2;
+    --accent: #2196F3;
+    --sidebar-bg: #1a2744;
+    --sidebar-hover: #243358;
+    --sidebar-active: #1565C0;
+    --header-bg: #1565C0;
+    --tab-active: #1565C0;
+    --tab-bg: #e8edf5;
+    --border: #c8d6e8;
+    --row-odd: #ffffff;
+    --row-even: #f0f5fb;
+    --row-hover: #deeaf8;
+    --row-selected: #b3d1f5;
+    --text-main: #1a2744;
+    --text-muted: #5a6a8a;
+    --btn-primary: #1565C0;
+    --btn-success: #2e7d32;
+    --btn-danger: #c62828;
+    --modal-header: #1565C0;
+    --font-main: 'Microsoft YaHei', 'Segoe UI', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font-main); background: #eef2f8; color: var(--text-main); font-size: 13px; height: 100vh; overflow: hidden; }
+
+  /* LAYOUT */
+  .app-wrapper { display: flex; height: 100vh; }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 200px; min-width: 200px; background: var(--sidebar-bg);
+    display: flex; flex-direction: column; z-index: 100;
+    box-shadow: 2px 0 8px rgba(0,0,0,0.18);
+    transition: width 0.2s;
+  }
+  .sidebar.collapsed { width: 52px; min-width: 52px; }
+  .sidebar-logo {
+    background: var(--primary-dark); padding: 12px 14px; display: flex; align-items: center; gap: 8px;
+    min-height: 52px; border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .sidebar-logo .logo-icon { color: #fff; font-size: 20px; flex-shrink: 0; }
+  .sidebar-logo .logo-text { color: #fff; font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; }
+  .sidebar-logo .logo-sub { color: rgba(255,255,255,0.6); font-size: 10px; white-space: nowrap; }
+
+  .sidebar-nav { flex: 1; overflow-y: auto; padding: 8px 0; }
+  .nav-section-title {
+    color: rgba(255,255,255,0.35); font-size: 10px; text-transform: uppercase;
+    letter-spacing: 1px; padding: 12px 14px 4px; white-space: nowrap; overflow: hidden;
+  }
+  .nav-item { position: relative; }
+  .nav-link {
+    display: flex; align-items: center; gap: 10px; padding: 9px 14px;
+    color: rgba(255,255,255,0.75); text-decoration: none; cursor: pointer;
+    transition: all 0.15s; white-space: nowrap; overflow: hidden; border-left: 3px solid transparent;
+  }
+  .nav-link:hover { background: var(--sidebar-hover); color: #fff; }
+  .nav-link.active { background: var(--sidebar-active); color: #fff; border-left-color: #64b5f6; }
+  .nav-link .nav-icon { font-size: 14px; flex-shrink: 0; width: 18px; text-align: center; }
+  .nav-link .nav-text { font-size: 12.5px; flex: 1; }
+  .nav-link .nav-arrow { font-size: 10px; transition: transform 0.2s; }
+  .nav-link.open .nav-arrow { transform: rotate(90deg); }
+
+  .nav-submenu { background: rgba(0,0,0,0.15); display: none; }
+  .nav-submenu.open { display: block; }
+  .nav-submenu .nav-link { padding-left: 38px; font-size: 12px; border-left: none; }
+  .nav-submenu .nav-link.active { background: rgba(21,101,192,0.6); border-left: 2px solid #64b5f6; }
+
+  /* MAIN CONTENT */
+  .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  /* TOPBAR */
+  .topbar {
+    background: var(--header-bg); height: 44px; display: flex; align-items: center;
+    padding: 0 16px; gap: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.15); z-index: 50; flex-shrink: 0;
+  }
+  .topbar-toggle { color: rgba(255,255,255,0.8); cursor: pointer; font-size: 16px; }
+  .topbar-title { color: #fff; font-size: 15px; font-weight: 700; flex: 1; }
+  .topbar-user { display: flex; align-items: center; gap: 8px; color: #fff; }
+  .topbar-user .user-avatar {
+    width: 28px; height: 28px; border-radius: 50%; background: rgba(255,255,255,0.2);
+    display: flex; align-items: center; justify-content: center; font-size: 12px;
+  }
+  .topbar-user .user-name { font-size: 12.5px; }
+  .lang-switcher { display: flex; gap: 4px; }
+  .lang-btn {
+    padding: 2px 8px; border-radius: 3px; cursor: pointer; font-size: 11px;
+    border: 1px solid rgba(255,255,255,0.3); color: rgba(255,255,255,0.7); background: transparent; transition: all 0.15s;
+  }
+  .lang-btn.active, .lang-btn:hover { background: rgba(255,255,255,0.2); color: #fff; }
+  .topbar-logout { color: rgba(255,255,255,0.7); cursor: pointer; font-size: 12px; padding: 3px 8px;
+    border: 1px solid rgba(255,255,255,0.25); border-radius: 3px; }
+  .topbar-logout:hover { background: rgba(255,255,255,0.1); color: #fff; }
+
+  /* MODULE TABS */
+  .module-tabs {
+    background: var(--tab-bg); border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; padding: 0 8px; flex-shrink: 0; height: 34px; gap: 2px;
+  }
+  .mod-tab {
+    padding: 5px 14px; cursor: pointer; font-size: 12.5px; border-radius: 4px 4px 0 0;
+    border: 1px solid transparent; border-bottom: none; display: flex; align-items: center; gap: 6px;
+    color: var(--text-muted); background: rgba(255,255,255,0.5); transition: all 0.15s; position: relative; top: 1px;
+  }
+  .mod-tab.active { background: #fff; border-color: var(--border); color: var(--primary); font-weight: 600; }
+  .mod-tab .tab-close { font-size: 10px; color: #aaa; margin-left: 4px; }
+  .mod-tab .tab-close:hover { color: var(--btn-danger); }
+
+  /* CONTENT AREA */
+  .content-area { flex: 1; overflow: auto; background: #eef2f8; }
+  .module-panel { display: none; padding: 10px; height: 100%; }
+  .module-panel.active { display: flex; flex-direction: column; }
+
+  /* TOOLBAR */
+  .toolbar {
+    background: #fff; border: 1px solid var(--border); border-radius: 4px;
+    padding: 8px 12px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .toolbar-label { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+  .toolbar input, .toolbar select { height: 28px; font-size: 12px; border: 1px solid var(--border); border-radius: 3px; padding: 0 8px; }
+  .toolbar-sep { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
+  .btn-sm-custom {
+    height: 28px; padding: 0 12px; font-size: 12px; border-radius: 3px; cursor: pointer;
+    display: flex; align-items: center; gap: 5px; border: 1px solid; transition: all 0.15s; white-space: nowrap;
+  }
+  .btn-blue { background: var(--btn-primary); color: #fff; border-color: var(--btn-primary); }
+  .btn-blue:hover { background: var(--primary-dark); }
+  .btn-green { background: var(--btn-success); color: #fff; border-color: var(--btn-success); }
+  .btn-green:hover { background: #1b5e20; }
+  .btn-orange { background: #e65100; color: #fff; border-color: #e65100; }
+  .btn-outline { background: #fff; color: var(--text-main); border-color: var(--border); }
+  .btn-outline:hover { background: var(--row-even); }
+
+  /* DATA TABLE */
+  .table-container {
+    flex: 1; background: #fff; border: 1px solid var(--border); border-radius: 4px;
+    overflow: auto; box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .data-table { width: 100%; border-collapse: collapse; min-width: 600px; }
+  .data-table thead th {
+    background: linear-gradient(180deg, #2579d0, #1565C0);
+    color: #fff; padding: 7px 10px; font-size: 12px; font-weight: 600;
+    white-space: nowrap; border-right: 1px solid rgba(255,255,255,0.15);
+    position: sticky; top: 0; z-index: 10; user-select: none;
+  }
+  .data-table thead th.sortable { cursor: pointer; }
+  .data-table thead th.sortable:hover { background: linear-gradient(180deg, #2e87e0, #1976D2); }
+  .data-table thead th .sort-icon { font-size: 9px; margin-left: 4px; opacity: 0.7; }
+  .data-table tbody tr:nth-child(odd) { background: var(--row-odd); }
+  .data-table tbody tr:nth-child(even) { background: var(--row-even); }
+  .data-table tbody tr:hover { background: var(--row-hover); }
+  .data-table tbody tr.selected { background: var(--row-selected) !important; }
+  .data-table td { padding: 6px 10px; font-size: 12px; border-bottom: 1px solid #e8edf5; white-space: nowrap; }
+  .data-table td.action-cell { display: flex; gap: 4px; }
+  .action-btn { width: 22px; height: 22px; border-radius: 3px; border: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; }
+  .action-edit { background: #e3f2fd; color: #1565C0; }
+  .action-edit:hover { background: #bbdefb; }
+  .action-del { background: #ffebee; color: #c62828; }
+  .action-del:hover { background: #ffcdd2; }
+  .action-view { background: #e8f5e9; color: #2e7d32; }
+  .action-view:hover { background: #c8e6c9; }
+
+  /* STATUS BADGES */
+  .badge-open { background: #fff3e0; color: #e65100; padding: 2px 7px; border-radius: 10px; font-size: 11px; }
+  .badge-closed { background: #e8f5e9; color: #2e7d32; padding: 2px 7px; border-radius: 10px; font-size: 11px; }
+  .badge-normal { background: #e3f2fd; color: #1565C0; padding: 2px 7px; border-radius: 10px; font-size: 11px; }
+
+  /* PAGINATION */
+  .pagination-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 6px 12px; background: #fff; border: 1px solid var(--border);
+    border-top: none; border-radius: 0 0 4px 4px; font-size: 12px; flex-shrink: 0;
+  }
+  .pag-info { color: var(--text-muted); }
+  .pag-btns { display: flex; gap: 3px; align-items: center; }
+  .pag-btn {
+    width: 26px; height: 24px; border: 1px solid var(--border); background: #fff; border-radius: 3px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--text-main);
+  }
+  .pag-btn:hover, .pag-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+  .pag-btn:disabled { opacity: 0.4; cursor: default; }
+
+  /* COLUMN TOGGLE DROPDOWN */
+  .col-toggle-dropdown {
+    position: absolute; z-index: 200; background: #fff; border: 1px solid var(--border);
+    border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.12); padding: 6px 0; min-width: 160px; display: none;
+  }
+  .col-toggle-dropdown.open { display: block; }
+  .col-toggle-item {
+    display: flex; align-items: center; gap: 8px; padding: 5px 14px; cursor: pointer; font-size: 12px;
+  }
+  .col-toggle-item:hover { background: var(--row-even); }
+  .col-toggle-item input[type=checkbox] { accent-color: var(--primary); }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 1000;
+    display: none; align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: #fff; border-radius: 6px; box-shadow: 0 8px 32px rgba(0,0,0,0.22);
+    width: 920px; max-width: 96vw; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden;
+  }
+  .modal-box.modal-sm { width: 520px; }
+  .modal-box.modal-lg { width: 1100px; }
+  .modal-header-bar {
+    background: var(--modal-header); color: #fff; padding: 10px 16px;
+    display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+  }
+  .modal-header-bar h5 { font-size: 14px; font-weight: 700; margin: 0; }
+  .modal-close-btn { background: none; border: none; color: rgba(255,255,255,0.8); cursor: pointer; font-size: 16px; }
+  .modal-close-btn:hover { color: #fff; }
+  .modal-body-custom { padding: 14px 16px; overflow-y: auto; flex: 1; }
+  .modal-footer-custom {
+    padding: 10px 16px; background: #f5f7fa; border-top: 1px solid var(--border);
+    display: flex; justify-content: center; gap: 10px; flex-shrink: 0;
+  }
+  .modal-footer-custom .btn-modal {
+    padding: 6px 28px; font-size: 13px; border-radius: 4px; cursor: pointer; font-weight: 600;
+    border: none; transition: all 0.15s;
+  }
+  .btn-modal-save { background: var(--btn-primary); color: #fff; }
+  .btn-modal-save:hover { background: var(--primary-dark); }
+  .btn-modal-cancel { background: #78909c; color: #fff; }
+  .btn-modal-cancel:hover { background: #546e7a; }
+
+  /* FORM STYLES */
+  .form-section-title {
+    font-size: 12.5px; font-weight: 700; color: #fff; background: var(--primary);
+    padding: 5px 12px; border-radius: 3px; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;
+  }
+  .form-row-custom { display: flex; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
+  .form-group-custom { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 150px; }
+  .form-group-custom label { font-size: 12px; color: var(--text-muted); font-weight: 600; }
+  .form-group-custom label .req { color: #c62828; margin-left: 2px; }
+  .form-group-custom input, .form-group-custom select, .form-group-custom textarea {
+    border: 1px solid var(--border); border-radius: 3px; padding: 5px 8px; font-size: 12.5px;
+    font-family: var(--font-main); transition: border-color 0.15s; background: #fff;
+  }
+  .form-group-custom input:focus, .form-group-custom select:focus, .form-group-custom textarea:focus {
+    outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px rgba(33,150,243,0.12);
+  }
+  .form-group-custom textarea { resize: vertical; min-height: 60px; }
+  .form-group-custom.invalid input, .form-group-custom.invalid select { border-color: #c62828; }
+  .form-error { font-size: 11px; color: #c62828; }
+
+  /* AUDIT MODAL TWO-PANEL */
+  .audit-panels { display: flex; gap: 12px; }
+  .audit-panel { flex: 1; border: 1px solid var(--border); border-radius: 4px; padding: 10px; }
+  .audit-panel.left-panel { flex: 1.1; }
+  .audit-panel.right-panel { flex: 1; }
+
+  /* TOP SECTION */
+  .audit-top-section { border: 1px solid var(--border); border-radius: 4px; padding: 10px; margin-bottom: 10px; background: #f8fafd; }
+  .audit-top-section .section-label { font-size: 12px; font-weight: 700; color: var(--primary); margin-bottom: 8px; }
+
+  /* VIOLATION DETAIL MODAL */
+  .detail-row { display: flex; gap: 0; border-bottom: 1px solid var(--border); }
+  .detail-label { background: #f0f5fb; width: 110px; min-width: 110px; padding: 7px 10px; font-size: 12px; font-weight: 600; color: var(--text-muted); border-right: 1px solid var(--border); }
+  .detail-value { padding: 7px 10px; font-size: 12.5px; flex: 1; }
+
+  /* TOAST */
+  .toast-container { position: fixed; top: 60px; right: 16px; z-index: 2000; display: flex; flex-direction: column; gap: 6px; }
+  .toast-msg {
+    background: #fff; border: 1px solid var(--border); border-radius: 4px; padding: 10px 14px;
+    font-size: 12.5px; box-shadow: 0 4px 12px rgba(0,0,0,0.12); display: flex; align-items: center; gap: 8px;
+    animation: slideIn 0.2s ease; min-width: 220px;
+  }
+  .toast-msg.success { border-left: 4px solid #2e7d32; }
+  .toast-msg.error { border-left: 4px solid #c62828; }
+  .toast-msg.info { border-left: 4px solid var(--primary); }
+  @keyframes slideIn { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: #f0f0f0; }
+  ::-webkit-scrollbar-thumb { background: #bbb; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #999; }
+
+  /* RESPONSIVE */
+  .sidebar.collapsed .logo-text, .sidebar.collapsed .logo-sub,
+  .sidebar.collapsed .nav-text, .sidebar.collapsed .nav-arrow,
+  .sidebar.collapsed .nav-section-title { display: none; }
+  .sidebar.collapsed .nav-link { justify-content: center; padding: 10px; }
+
+  /* LOADING */
+  .loading-overlay {
+    position: absolute; inset: 0; background: rgba(255,255,255,0.7);
+    display: flex; align-items: center; justify-content: center; z-index: 50; border-radius: 4px;
+  }
+  .spinner { width: 28px; height: 28px; border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div class="app-wrapper">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <i class="fas fa-industry logo-icon"></i>
+      <div>
+        <div class="logo-text" data-i18n="appName">广部管理系统</div>
+        <div class="logo-sub" data-i18n="appSub">Factory Management</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-title" data-i18n="navAudit">AUDIT</div>
+      <div class="nav-item">
+        <a class="nav-link active open" onclick="toggleMenu('menu-audit',this)">
+          <i class="fas fa-clipboard-check nav-icon"></i>
+          <span class="nav-text" data-i18n="menuDayShift">白班巡检记录</span>
+          <i class="fas fa-chevron-right nav-arrow"></i>
+        </a>
+        <div class="nav-submenu open" id="menu-audit">
+          <a class="nav-link active" onclick="switchModule('mod-time',this)" data-i18n="menuTime">巡检时间登记</a>
+          <a class="nav-link" onclick="switchModule('mod-improve',this)" data-i18n="menuImprove">要改善项目登记</a>
+          <a class="nav-link" onclick="switchModule('mod-violation',this)" data-i18n="menuViolation">违纪登记</a>
+        </div>
+      </div>
+      <div class="nav-section-title" data-i18n="navAdmin">ADMIN</div>
+      <div class="nav-item">
+        <a class="nav-link" onclick="switchModule('mod-staff',this)">
+          <i class="fas fa-users nav-icon"></i>
+          <span class="nav-text" data-i18n="menuStaff">员工管理</span>
+        </a>
+      </div>
+      <div class="nav-item">
+        <a class="nav-link" onclick="switchModule('mod-schedule',this)">
+          <i class="fas fa-calendar-alt nav-icon"></i>
+          <span class="nav-text" data-i18n="menuSchedule">值班排班</span>
+        </a>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-content">
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <i class="fas fa-bars topbar-toggle" onclick="toggleSidebar()"></i>
+      <span class="topbar-title" data-i18n="appTitle">广部管理系统</span>
+      <div class="lang-switcher">
+        <button class="lang-btn active" onclick="setLang('zh')">中文</button>
+        <button class="lang-btn" onclick="setLang('vi')">VI</button>
+        <button class="lang-btn" onclick="setLang('en')">EN</button>
+      </div>
+      <div class="topbar-user">
+        <div class="user-avatar"><i class="fas fa-user"></i></div>
+        <span class="user-name">黄佳东，欢迎你</span>
+      </div>
+      <div class="topbar-logout"><i class="fas fa-sign-out-alt"></i> <span data-i18n="logout">退出</span></div>
+    </div>
+
+    <!-- MODULE TABS -->
+    <div class="module-tabs" id="moduleTabs">
+      <div class="mod-tab active" id="tab-time" onclick="switchModule('mod-time',null,'tab-time')">
+        <i class="fas fa-clock" style="font-size:11px"></i> <span data-i18n="menuTime">巡检时间登记</span>
+      </div>
+      <div class="mod-tab" id="tab-improve" onclick="switchModule('mod-improve',null,'tab-improve')">
+        <i class="fas fa-tools" style="font-size:11px"></i> <span data-i18n="menuImprove">要改善项目登记</span>
+      </div>
+      <div class="mod-tab" id="tab-violation" onclick="switchModule('mod-violation',null,'tab-violation')">
+        <i class="fas fa-exclamation-triangle" style="font-size:11px"></i> <span data-i18n="menuViolation">违纪登记</span>
+      </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content-area">
+
+      <!-- MODULE 1: 巡检时间登记 -->
+      <div class="module-panel active" id="mod-time">
+        <div class="toolbar">
+          <span class="toolbar-label" data-i18n="inspector">巡检人员:</span>
+          <input type="text" id="search-inspector" placeholder="" style="width:160px">
+          <button class="btn-sm-custom btn-blue" onclick="searchData()"><i class="fas fa-search"></i> <span data-i18n="search">查询</span></button>
+          <div class="toolbar-sep"></div>
+          <button class="btn-sm-custom btn-green" onclick="openAuditModal()"><i class="fas fa-plus"></i> <span data-i18n="addNew">新增</span></button>
+          <div class="toolbar-sep"></div>
+          <div style="position:relative">
+            <button class="btn-sm-custom btn-outline" onclick="toggleColMenu('col-menu-time')"><i class="fas fa-columns"></i> <span data-i18n="columns">列</span></button>
+            <div class="col-toggle-dropdown" id="col-menu-time">
+              <div class="col-toggle-item"><input type="checkbox" checked id="col-t1" onchange="toggleCol('t',1)"><label for="col-t1" data-i18n="colSeq">序号</label></div>
+              <div class="col-toggle-item"><input type="checkbox" checked id="col-t2" onchange="toggleCol('t',2)"><label for="col-t2" data-i18n="colSysTime">系统记录时间</label></div>
+              <div class="col-toggle-item"><input type="checkbox" checked id="col-t3" onchange="toggleCol('t',3)"><label for="col-t3" data-i18n="colStartTime">开始时间</label></div>
+              <div class="col-toggle-item"><input type="checkbox" checked id="col-t4" onchange="toggleCol('t',4)"><label for="col-t4" data-i18n="colEndTime">结束时间</label></div>
+              <div class="col-toggle-item"><input type="checkbox" checked id="col-t5" onchange="toggleCol('t',5)"><label for="col-t5" data-i18n="colArea">巡检区域</label></div>
+              <div class="col-toggle-item"><input type="checkbox" checked id="col-t6" onchange="toggleCol('t',6)"><label for="col-t6" data-i18n="colInspector2">巡检人员</label></div>
+              <div class="col-toggle-item"><input type="checkbox" checked id="col-t7" onchange="toggleCol('t',7)"><label for="col-t7" data-i18n="colRemark">备注</label></div>
+            </div>
+          </div>
+          <button class="btn-sm-custom btn-orange" onclick="showToast('正在导出 Excel...','info')"><i class="fas fa-file-excel"></i> <span data-i18n="export">导出</span></button>
+        </div>
+        <div class="table-container" style="position:relative">
+          <table class="data-table" id="table-time">
+            <thead>
+              <tr>
+                <th style="width:50px" class="sortable" onclick="sortTable('time','seq')" data-i18n="colSeq">序号 <i class="fas fa-sort sort-icon"></i></th>
+                <th class="sortable" onclick="sortTable('time','sysTime')" data-i18n="colSysTime">系统记录时间 <i class="fas fa-sort sort-icon"></i></th>
+                <th class="sortable" onclick="sortTable('time','startTime')" data-i18n="colStartTime">开始时间 <i class="fas fa-sort-up sort-icon"></i></th>
+                <th data-i18n="colEndTime">结束时间</th>
+                <th data-i18n="colArea">巡检区域</th>
+                <th data-i18n="colInspector2">巡检人员</th>
+                <th data-i18n="colRemark">备注</th>
+                <th style="width:70px" data-i18n="colActions">操作</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-time"></tbody>
+          </table>
+        </div>
+        <div class="pagination-bar">
+          <span class="pag-info" id="pag-info-time">显示第 1 至 25 记录，一共 811 条</span>
+          <div class="pag-btns">
+            <button class="pag-btn" title="首页"><i class="fas fa-angle-double-left"></i></button>
+            <button class="pag-btn" title="上页"><i class="fas fa-angle-left"></i></button>
+            <button class="pag-btn">3</button>
+            <button class="pag-btn active">4</button>
+            <button class="pag-btn">5</button>
+            <span style="padding:0 4px;font-size:12px;color:var(--text-muted)">/ 33</span>
+            <button class="pag-btn" title="下页"><i class="fas fa-angle-right"></i></button>
+            <button class="pag-btn" title="末页"><i class="fas fa-angle-double-right"></i></button>
+            <button class="pag-btn" title="刷新"><i class="fas fa-sync-alt"></i></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODULE 2: 要改善项目登记 -->
+      <div class="module-panel" id="mod-improve">
+        <div class="toolbar">
+          <span class="toolbar-label" data-i18n="date">日期:</span>
+          <input type="date" style="width:140px">
+          <span style="font-size:12px;color:var(--text-muted)">至</span>
+          <input type="date" style="width:140px">
+          <button class="btn-sm-custom btn-blue" onclick="searchData()"><i class="fas fa-search"></i> <span data-i18n="search">查询</span></button>
+          <div class="toolbar-sep"></div>
+          <button class="btn-sm-custom btn-green" onclick="openImproveModal()"><i class="fas fa-plus"></i> <span data-i18n="addNew">新增</span></button>
+          <div class="toolbar-sep"></div>
+          <button class="btn-sm-custom btn-orange" onclick="showToast('正在导出...','info')"><i class="fas fa-file-excel"></i> <span data-i18n="export">导出</span></button>
+        </div>
+        <div class="table-container">
+          <table class="data-table" id="table-improve">
+            <thead>
+              <tr>
+                <th style="width:50px" data-i18n="colSeq">序号</th>
+                <th class="sortable" data-i18n="colDate">日期 <i class="fas fa-sort sort-icon"></i></th>
+                <th data-i18n="colIssue">需改善现象</th>
+                <th data-i18n="colDept">检查区域负责部门</th>
+                <th data-i18n="colChecker">检查人</th>
+                <th data-i18n="colRemark">备注 <i class="fas fa-sort-up sort-icon"></i></th>
+                <th style="width:70px" data-i18n="colActions">操作</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-improve"></tbody>
+          </table>
+        </div>
+        <div class="pagination-bar">
+          <span class="pag-info">显示第 1 至 25 记录，一共 121 条</span>
+          <div class="pag-btns">
+            <button class="pag-btn"><i class="fas fa-angle-double-left"></i></button>
+            <button class="pag-btn active">1</button>
+            <button class="pag-btn">2</button>
+            <button class="pag-btn">3</button>
+            <span style="padding:0 4px;font-size:12px;color:var(--text-muted)">/ 5</span>
+            <button class="pag-btn"><i class="fas fa-angle-right"></i></button>
+            <button class="pag-btn"><i class="fas fa-angle-double-right"></i></button>
+            <button class="pag-btn"><i class="fas fa-sync-alt"></i></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODULE 3: 违纪登记 -->
+      <div class="module-panel" id="mod-violation">
+        <div class="toolbar">
+          <span class="toolbar-label" data-i18n="keyword">关键字:</span>
+          <input type="text" style="width:130px" placeholder="">
+          <span class="toolbar-label" data-i18n="time">时间:</span>
+          <input type="datetime-local" style="width:160px">
+          <span style="font-size:12px;color:var(--text-muted)">至</span>
+          <input type="datetime-local" style="width:160px">
+          <button class="btn-sm-custom btn-blue" onclick="searchData()"><i class="fas fa-search"></i> <span data-i18n="search">查询</span></button>
+          <div class="toolbar-sep"></div>
+          <button class="btn-sm-custom btn-green" onclick="openViolationModal()"><i class="fas fa-plus"></i> <span data-i18n="addNew">新增</span></button>
+          <div style="position:relative">
+            <button class="btn-sm-custom btn-outline" onclick="toggleColMenu('col-menu-vio')"><i class="fas fa-columns"></i> <span data-i18n="columns">列</span></button>
+            <div class="col-toggle-dropdown" id="col-menu-vio">
+              <div class="col-toggle-item"><input type="checkbox" checked><label data-i18n="colSeq">序号</label></div>
+              <div class="col-toggle-item"><input type="checkbox" checked><label data-i18n="colDept">部门</label></div>
+              <div class="col-toggle-item"><input type="checkbox" checked><label data-i18n="colEmpId">工号</label></div>
+              <div class="col-toggle-item"><input type="checkbox" checked><label data-i18n="colName">姓名</label></div>
+              <div class="col-toggle-item"><input type="checkbox" checked><label data-i18n="colVioTime">违纪时间</label></div>
+              <div class="col-toggle-item"><input type="checkbox" checked><label data-i18n="colLocation">发生地点</label></div>
+              <div class="col-toggle-item"><input type="checkbox" checked><label data-i18n="colVioType">违纪现象</label></div>
+              <div class="col-toggle-item"><input type="checkbox" checked><label data-i18n="colInspector2">检查人</label></div>
+              <div class="col-toggle-item"><input type="checkbox" checked><label data-i18n="colPunish">处罚措施</label></div>
+              <div class="col-toggle-item"><input type="checkbox" checked><label data-i18n="colSuperior">上级领导</label></div>
+              <div class="col-toggle-item"><input type="checkbox" checked><label data-i18n="colStatus">关闭状态</label></div>
+            </div>
+          </div>
+          <button class="btn-sm-custom btn-orange" onclick="showToast('正在导出...','info')"><i class="fas fa-file-excel"></i> <span data-i18n="export">导出</span></button>
+        </div>
+        <div class="table-container">
+          <table class="data-table" id="table-violation">
+            <thead>
+              <tr>
+                <th style="width:45px" data-i18n="colSeq">序号</th>
+                <th data-i18n="colDept">部门</th>
+                <th data-i18n="colEmpId">工号</th>
+                <th data-i18n="colName">姓名</th>
+                <th class="sortable" data-i18n="colVioTime">违纪时间 <i class="fas fa-sort sort-icon"></i></th>
+                <th data-i18n="colLocation">发生地点</th>
+                <th data-i18n="colVioType">违纪现象</th>
+                <th data-i18n="colInspector2">检查人</th>
+                <th data-i18n="colPunish">处罚措施</th>
+                <th data-i18n="colSuperior">上级领导</th>
+                <th data-i18n="colStatus">关闭状态</th>
+                <th style="width:70px" data-i18n="colActions">操作</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-violation"></tbody>
+          </table>
+        </div>
+        <div class="pagination-bar">
+          <span class="pag-info">显示第 1 至 25 记录，一共 481 条</span>
+          <div class="pag-btns">
+            <button class="pag-btn"><i class="fas fa-angle-double-left"></i></button>
+            <button class="pag-btn active">1</button>
+            <button class="pag-btn">2</button>
+            <button class="pag-btn">3</button>
+            <span style="padding:0 4px;font-size:12px;color:var(--text-muted)">/ 20</span>
+            <button class="pag-btn"><i class="fas fa-angle-right"></i></button>
+            <button class="pag-btn"><i class="fas fa-angle-double-right"></i></button>
+            <button class="pag-btn"><i class="fas fa-sync-alt"></i></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODULE: Staff placeholder -->
+      <div class="module-panel" id="mod-staff">
+        <div style="margin:40px auto;text-align:center;color:var(--text-muted)"><i class="fas fa-users fa-3x" style="margin-bottom:12px;opacity:0.3"></i><br><span data-i18n="menuStaff">员工管理</span> - Coming Soon</div>
+      </div>
+      <div class="module-panel" id="mod-schedule">
+        <div style="margin:40px auto;text-align:center;color:var(--text-muted)"><i class="fas fa-calendar-alt fa-3x" style="margin-bottom:12px;opacity:0.3"></i><br><span data-i18n="menuSchedule">值班排班</span> - Coming Soon</div>
+      </div>
+    </div><!-- /content-area -->
+  </div>
+</div>
+
+<!-- ===== MODAL: AUDIT (Inspection Time + Improve + Violation combined) ===== -->
+<div class="modal-overlay" id="modal-audit">
+  <div class="modal-box modal-lg">
+    <div class="modal-header-bar">
+      <h5><i class="fas fa-clipboard-check" style="margin-right:6px"></i> <span id="modal-audit-title">黄佳东白班巡检信息登记</span></h5>
+      <button class="modal-close-btn" onclick="closeModal('modal-audit')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body-custom">
+      <!-- Top: Audit Time -->
+      <div class="audit-top-section">
+        <div class="section-label"><i class="fas fa-clock" style="margin-right:5px"></i> 白班巡检时间登记（带 * 为必填项）</div>
+        <div class="form-row-custom">
+          <div class="form-group-custom" style="flex:1.2">
+            <label><span class="req">*</span> <span data-i18n="colStartTime">开始时间</span></label>
+            <input type="datetime-local" id="audit-start">
+          </div>
+          <div class="form-group-custom" style="flex:1.2">
+            <label><span class="req">*</span> <span data-i18n="colEndTime">结束时间</span></label>
+            <input type="datetime-local" id="audit-end">
+          </div>
+          <div class="form-group-custom" style="flex:2">
+            <label><span class="req">*</span> <span data-i18n="colArea">巡检区域</span></label>
+            <select id="audit-area" multiple style="height:60px">
+              <option>负1-1楼</option><option>2-3楼</option><option>4-5楼</option>
+              <option>6-8楼</option><option>9-13楼</option><option>1-4楼</option><option>5-8楼</option><option>其他</option>
+            </select>
+          </div>
+          <div class="form-group-custom">
+            <label data-i18n="colRemark">备注</label>
+            <input type="text" id="audit-remark">
+          </div>
+        </div>
+      </div>
+
+      <!-- Two panels -->
+      <div class="audit-panels" style="display: none;">
+        <!-- LEFT: 要改善项目登记 -->
+        <div class="audit-panel left-panel">
+          <div class="form-section-title"><i class="fas fa-tools"></i> 需改善项目登记（无需改善现象不要填写）</div>
+          <div class="form-row-custom">
+            <div class="form-group-custom">
+              <label data-i18n="colChecker">检查人</label>
+              <input type="text" value="黄佳东" readonly style="background:#f5f5f5">
+            </div>
+            <div class="form-group-custom">
+              <label data-i18n="colDate">日期</label>
+              <input type="date" id="improve-date" value="2026-05-11">
+            </div>
+          </div>
+          <div class="form-row-custom">
+            <div class="form-group-custom" style="flex:2">
+              <label data-i18n="colDeptResp">检查区域负责部门</label>
+              <select id="improve-dept">
+                <option value="">-- 请选择 --</option>
+                <option>外销生产</option><option>外销工程</option><option>SMT</option>
+                <option>维修</option><option>品管部</option><option>工程部</option><option>其他</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row-custom">
+            <div class="form-group-custom">
+              <label data-i18n="colIssue">需改善现象</label>
+              <textarea id="improve-issue" rows="3"></textarea>
+            </div>
+          </div>
+          <div class="form-row-custom">
+            <div class="form-group-custom">
+              <label data-i18n="colRemark">备注</label>
+              <textarea id="improve-remark" rows="2"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: 违纪登记 -->
+        <div class="audit-panel right-panel">
+          <div class="form-section-title"><i class="fas fa-exclamation-triangle"></i> 违纪登记</div>
+          <div class="form-row-custom">
+            <div class="form-group-custom">
+              <label data-i18n="colDept">部门</label>
+              <select id="vio-dept">
+                <option value="">-- 请选择 --</option>
+                <option>SMT</option><option>备品库</option><option>维修</option>
+                <option>特制课</option><option>工程部</option><option>IQC</option><option>品管部</option><option>网管</option>
+              </select>
+            </div>
+            <div class="form-group-custom">
+              <label data-i18n="colEmpId">工号</label>
+              <select id="vio-empid">
+                <option value="">-- 请选择 --</option>
+                <option>50236917</option><option>50237210</option><option>50182892</option><option>50229070</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row-custom">
+            <div class="form-group-custom">
+              <label data-i18n="colName">姓名</label>
+              <select id="vio-name">
+                <option value="">-- 请选择 --</option>
+                <option>何家远</option><option>陈梓光</option><option>李超</option><option>范家辉</option>
+              </select>
+            </div>
+            <div class="form-group-custom">
+              <label data-i18n="colVioTime">违纪时间</label>
+              <input type="datetime-local" id="vio-time">
+            </div>
+          </div>
+          <div class="form-row-custom">
+            <div class="form-group-custom">
+              <label data-i18n="colLocation">发生地点</label>
+              <input type="text" id="vio-location">
+            </div>
+          </div>
+          <div class="form-row-custom">
+            <div class="form-group-custom">
+              <label data-i18n="colSuperior">上级领导</label>
+              <select id="vio-superior">
+                <option value="">-- 请选择 --</option>
+                <option>曹子然</option><option>叶方俊</option><option>张博文</option><option>白翁文</option>
+              </select>
+            </div>
+            <div class="form-group-custom">
+              <label data-i18n="colCCMail">邮件抄送</label>
+              <select id="vio-cc">
+                <option value="">-- 请选择 --</option>
+                <option>谭婧</option><option>孙管理</option><option>李主管</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row-custom">
+            <div class="form-group-custom">
+              <label data-i18n="colVioType">违纪现象</label>
+              <textarea id="vio-phenomenon" rows="3"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer-custom">
+      <button class="btn-modal btn-modal-save" onclick="saveAudit()"><i class="fas fa-save" style="margin-right:5px"></i> <span data-i18n="save">保存</span></button>
+      <button class="btn-modal btn-modal-cancel" onclick="closeModal('modal-audit')"><i class="fas fa-times" style="margin-right:5px"></i> <span data-i18n="close">关闭</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Violation Detail/Edit -->
+<div class="modal-overlay" id="modal-vio-detail">
+  <div class="modal-box modal-sm">
+    <div class="modal-header-bar">
+      <h5><i class="fas fa-exclamation-circle" style="margin-right:6px"></i> 违纪信息跟进</h5>
+      <button class="modal-close-btn" onclick="closeModal('modal-vio-detail')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body-custom" id="vio-detail-body">
+      <div class="form-row-custom">
+        <div class="form-group-custom"><label data-i18n="colChecker">检查人</label><input type="text" value="杨思嘉" readonly style="background:#f5f5f5"></div>
+      </div>
+      <div class="form-row-custom">
+        <div class="form-group-custom"><label data-i18n="colDept">部门</label><select><option selected>SMT</option></select></div>
+        <div class="form-group-custom"><label data-i18n="colEmpId">工号</label><select><option selected>50237210</option></select></div>
+      </div>
+      <div class="form-row-custom">
+        <div class="form-group-custom"><label data-i18n="colName">姓名</label><select><option selected>何家远</option></select></div>
+        <div class="form-group-custom"><label data-i18n="colVioTime">违纪时间</label><input type="datetime-local" value="2026-04-18T23:05"></div>
+      </div>
+      <div class="form-row-custom">
+        <div class="form-group-custom"><label data-i18n="colLocation">发生地点</label><input type="text" value="SMT车间C4线"></div>
+      </div>
+      <div class="form-row-custom">
+        <div class="form-group-custom"><label data-i18n="colVioType">违纪现象</label><textarea rows="2">趴在桌子上睡觉</textarea></div>
+      </div>
+      <div class="form-row-custom">
+        <div class="form-group-custom"><label data-i18n="colSuperior">上级领导</label><select><option selected>曹子然</option></select></div>
+        <div class="form-group-custom"><label data-i18n="colCCMail">邮件抄送</label><select><option selected>谭婧</option></select></div>
+      </div>
+      <div class="form-row-custom">
+        <div class="form-group-custom"><label data-i18n="colPunish">处罚措施</label><textarea rows="2">查监控确认属实，书面警告处理</textarea></div>
+      </div>
+    </div>
+    <div class="modal-footer-custom">
+      <button class="btn-modal btn-modal-save" onclick="saveViolation()"><i class="fas fa-save" style="margin-right:5px"></i> <span data-i18n="save">保存</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Improve Add/Edit -->
+<div class="modal-overlay" id="modal-improve">
+  <div class="modal-box modal-sm">
+    <div class="modal-header-bar">
+      <h5><i class="fas fa-tools" style="margin-right:6px"></i> 需改善项目登记</h5>
+      <button class="modal-close-btn" onclick="closeModal('modal-improve')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body-custom">
+      <div class="form-row-custom">
+        <div class="form-group-custom"><label data-i18n="colChecker">检查人</label><input type="text" value="黄佳东" readonly style="background:#f5f5f5"></div>
+        <div class="form-group-custom"><label data-i18n="colDate">日期</label><input type="date" value="2026-05-11"></div>
+      </div>
+      <div class="form-row-custom">
+        <div class="form-group-custom"><label data-i18n="colDeptResp">检查区域负责部门</label>
+          <select><option value="">--</option><option>外销生产</option><option>SMT</option><option>维修</option><option>品管部</option><option>其他</option></select>
+        </div>
+      </div>
+      <div class="form-row-custom">
+        <div class="form-group-custom"><label data-i18n="colIssue">需改善现象</label><textarea rows="3"></textarea></div>
+      </div>
+      <div class="form-row-custom">
+        <div class="form-group-custom"><label data-i18n="colRemark">备注</label><textarea rows="2"></textarea></div>
+      </div>
+    </div>
+    <div class="modal-footer-custom">
+      <button class="btn-modal btn-modal-save" onclick="saveImprove()"><i class="fas fa-save" style="margin-right:5px"></i> <span data-i18n="save">保存</span></button>
+      <button class="btn-modal btn-modal-cancel" onclick="closeModal('modal-improve')"><i class="fas fa-times" style="margin-right:5px"></i> <span data-i18n="close">关闭</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script>
+// ===== I18N =====
+const i18n = {
+  zh: {
+    appName:'广部管理系统', appSub:'厂部管理', appTitle:'广部管理系统',
+    navAudit:'巡检', navAdmin:'管理', menuDayShift:'白班巡检记录',
+    menuTime:'巡检时间登记', menuImprove:'要改善项目登记', menuViolation:'违纪登记',
+    menuStaff:'员工管理', menuSchedule:'值班排班', logout:'退出',
+    inspector:'巡检人员:', date:'日期:', keyword:'关键字:', time:'时间:', search:'查询',
+    addNew:'新增', columns:'列', export:'导出', save:'保存', close:'关闭',
+    colSeq:'序号', colSysTime:'系统记录时间', colStartTime:'开始时间', colEndTime:'结束时间',
+    colArea:'巡检区域', colInspector2:'巡检人员', colRemark:'备注', colActions:'操作',
+    colDate:'日期', colIssue:'需改善现象', colDept:'部门', colDeptResp:'检查区域负责部门',
+    colChecker:'检查人', colEmpId:'工号', colName:'姓名', colVioTime:'违纪时间',
+    colLocation:'发生地点', colVioType:'违纪现象', colPunish:'处罚措施',
+    colSuperior:'上级领导', colCCMail:'邮件抄送', colStatus:'关闭状态',
+  },
+  vi: {
+    appName:'Hệ Thống Quản Lý', appSub:'Nhà Máy', appTitle:'Hệ Thống Quản Lý Nhà Máy',
+    navAudit:'KIỂM TRA', navAdmin:'QUẢN TRỊ', menuDayShift:'Ca Ngày Tuần Tra',
+    menuTime:'Đăng Ký Thời Gian', menuImprove:'Đăng Ký Cải Thiện', menuViolation:'Đăng Ký Vi Phạm',
+    menuStaff:'Quản Lý NV', menuSchedule:'Lịch Trực Ban', logout:'Đăng xuất',
+    inspector:'Người kiểm tra:', date:'Ngày:', keyword:'Từ khóa:', time:'Thời gian:', search:'Tìm kiếm',
+    addNew:'Thêm mới', columns:'Cột', export:'Xuất Excel', save:'Lưu', close:'Đóng',
+    colSeq:'STT', colSysTime:'Thời Gian Hệ Thống', colStartTime:'Thời Gian Bắt Đầu', colEndTime:'Thời Gian Kết Thúc',
+    colArea:'Khu Vực Tuần Tra', colInspector2:'Người Tuần Tra', colRemark:'Ghi Chú', colActions:'Thao Tác',
+    colDate:'Ngày', colIssue:'Hiện Tượng Cần Cải Thiện', colDept:'Bộ Phận', colDeptResp:'BP Phụ Trách Khu Vực',
+    colChecker:'Người Kiểm Tra', colEmpId:'Mã NV', colName:'Họ Tên', colVioTime:'Thời Gian Vi Phạm',
+    colLocation:'Địa Điểm', colVioType:'Hiện Tượng Vi Phạm', colPunish:'Biện Pháp Xử Phạt',
+    colSuperior:'Cấp Trên', colCCMail:'CC Email', colStatus:'Trạng Thái',
+  },
+  en: {
+    appName:'Factory Management', appSub:'System', appTitle:'Factory Management System',
+    navAudit:'AUDIT', navAdmin:'ADMIN', menuDayShift:'Day Shift Inspection',
+    menuTime:'Inspection Time', menuImprove:'Improvement Items', menuViolation:'Violations',
+    menuStaff:'Staff Management', menuSchedule:'Duty Schedule', logout:'Logout',
+    inspector:'Inspector:', date:'Date:', keyword:'Keyword:', time:'Time:', search:'Search',
+    addNew:'Add New', columns:'Columns', export:'Export', save:'Save', close:'Close',
+    colSeq:'No.', colSysTime:'System Time', colStartTime:'Start Time', colEndTime:'End Time',
+    colArea:'Inspection Area', colInspector2:'Inspector', colRemark:'Remark', colActions:'Actions',
+    colDate:'Date', colIssue:'Issue to Improve', colDept:'Department', colDeptResp:'Responsible Dept',
+    colChecker:'Checker', colEmpId:'Emp ID', colName:'Name', colVioTime:'Violation Time',
+    colLocation:'Location', colVioType:'Violation Type', colPunish:'Punishment', 
+    colSuperior:'Superior', colCCMail:'CC Email', colStatus:'Status',
+  }
+};
+let currentLang = 'zh';
+
+function setLang(lang) {
+  currentLang = lang;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (i18n[lang][key]) el.textContent = i18n[lang][key];
+  });
+}
+
+// ===== SAMPLE DATA =====
+const timeData = [
+  {seq:734, sysTime:'2025-11-17 07:53:44', startTime:'2025-11-15 10:15', endTime:'2025-11-15 10:30', area:'4-5楼, 6-8楼', inspector:'应嘉伟', remark:'巡检5~8楼，发现员工上班刷视频'},
+  {seq:736, sysTime:'2025-11-17 10:42:15', startTime:'2025-11-15 18:40', endTime:'2025-11-15 19:00', area:'4-5楼, 6-8楼', inspector:'冯明菲', remark:'巡检5-8楼，发现员工打游戏、刷视频'},
+  {seq:737, sysTime:'2025-11-17 14:18:08', startTime:'2025-11-16 09:14', endTime:'2025-11-16 09:45', area:'负1-1楼, 2-3楼, 4-5楼', inspector:'叶方俊', remark:'巡检负一楼至4楼，发现员工无权限但携带智能机'},
+  {seq:735, sysTime:'2025-11-17 09:43:44', startTime:'2025-11-17 09:30', endTime:'2025-11-17 09:50', area:'6-8楼', inspector:'沈政', remark:''},
+  {seq:739, sysTime:'2025-11-17 17:20:02', startTime:'2025-11-17 17:10', endTime:'2025-11-17 17:30', area:'负1-1楼, 2-3楼', inspector:'沈政', remark:''},
+  {seq:740, sysTime:'2025-11-18 16:57:49', startTime:'2025-11-18 15:56', endTime:'2025-11-18 16:20', area:'负1-1楼, 4-5楼', inspector:'侯景润', remark:'无异常'},
+  {seq:741, sysTime:'2025-11-21 15:47:18', startTime:'2025-11-21 15:10', endTime:'2025-11-21 15:35', area:'6-8楼', inspector:'邴鸣威', remark:'无异常'},
+  {seq:742, sysTime:'2025-11-22 14:09:49', startTime:'2025-11-22 13:07', endTime:'2025-11-22 13:30', area:'9-13楼', inspector:'叶正霆', remark:''},
+  {seq:743, sysTime:'2025-11-23 15:10:25', startTime:'2025-11-23 07:58', endTime:'2025-11-23 08:20', area:'其他', inspector:'厂部管理员', remark:''},
+  {seq:744, sysTime:'2025-11-23 15:22:59', startTime:'2025-11-23 14:22', endTime:'2025-11-23 14:45', area:'9-13楼', inspector:'冯明航', remark:'无异常'},
+  {seq:745, sysTime:'2025-11-26 16:24:28', startTime:'2025-11-23 16:21', endTime:'2025-11-23 18:20', area:'其他', inspector:'厂部管理员', remark:''},
+  {seq:746, sysTime:'2025-11-26 16:26:05', startTime:'2025-11-23 16:25', endTime:'2025-11-23 18:23', area:'其他', inspector:'厂部管理员', remark:''},
+  {seq:747, sysTime:'2025-11-26 16:27:22', startTime:'2025-11-23 16:26', endTime:'2025-11-23 18:23', area:'其他', inspector:'厂部管理员', remark:''},
+  {seq:748, sysTime:'2025-11-28 23:07:35', startTime:'2025-11-28 15:00', endTime:'2025-11-28 17:00', area:'2-3楼, 4-5楼', inspector:'何某佳', remark:''},
+  {seq:749, sysTime:'2025-12-03 08:14:56', startTime:'2025-11-29 22:07', endTime:'2025-11-29 23:08', area:'其他', inspector:'叶方俊', remark:''},
+  {seq:751, sysTime:'2025-12-05 21:32:29', startTime:'2025-12-04 03:00', endTime:'2025-12-04 04:30', area:'1-4楼', inspector:'guest', remark:'巡检到G栋3楼夹具房发现有员工玩手机'},
+  {seq:752, sysTime:'2025-12-05 21:37:22', startTime:'2025-12-04 04:30', endTime:'2025-12-04 05:00', area:'5-8楼', inspector:'guest', remark:'巡检到G栋5楼SMT发现有员工打瞌笼'},
+  {seq:750, sysTime:'2025-12-04 17:29:51', startTime:'2025-12-04 16:00', endTime:'2025-12-04 17:00', area:'2-3楼, 4-5楼', inspector:'王蒙', remark:'无问题'},
+  {seq:755, sysTime:'2025-12-05 21:52:16', startTime:'2025-12-05 06:30', endTime:'2025-12-05 07:00', area:'1-8楼', inspector:'guest', remark:'巡检到G栋3楼夹具房发现有员工打瞌笼'},
+  {seq:754, sysTime:'2025-12-05 21:48:08', startTime:'2025-12-05 06:30', endTime:'2025-12-05 07:00', area:'1-4楼', inspector:'guest', remark:'巡检到G栋3楼夹具房发现员工打瞌笼'},
+];
+
+const improveData = [
+  {seq:119, date:'2025-11-28', issue:'4FB东侧男厕有烟味，疑似员工抽烟', dept:'外销生产', checker:'何某佳', remark:''},
+  {seq:117, date:'2025-11-13', issue:'无异常', dept:'外销生产', checker:'刘佳奇', remark:''},
+  {seq:121, date:'2025-12-06', issue:'3F办公室常右未关灯', dept:'其他', checker:'叶方俊', remark:''},
+  {seq:120, date:'2025-12-02', issue:'3楼3B办公室没有人，灯一直开着', dept:'3楼3B办公室', checker:'叶方俊', remark:''},
+  {seq:110, date:'2025-02-12', issue:'无异常', dept:'其他', checker:'姚元亮', remark:''},
+  {seq:109, date:'2025-01-13', issue:'需换回自己的鞋子，才可以打卡下班', dept:'外销生产', checker:'朱泽平', remark:''},
+  {seq:108, date:'2025-01-13', issue:'需换回自己的鞋子，才能打卡下班', dept:'外销生产', checker:'朱泽平', remark:''},
+  {seq:107, date:'2025-01-11', issue:'班组宣导，下班需要换鞋', dept:'外销生产', checker:'朱泽平', remark:''},
+  {seq:106, date:'2025-01-11', issue:'班组宣导，下班需要换鞋', dept:'外销生产', checker:'朱泽平', remark:''},
+  {seq:105, date:'2025-01-11', issue:'班组宣导，下班需要换鞋', dept:'外销生产', checker:'朱泽平', remark:''},
+  {seq:104, date:'2025-01-11', issue:'班组宣导，下班需要换鞋', dept:'外销生产', checker:'朱泽平', remark:''},
+  {seq:113, date:'2025-04-22', issue:'统一换鞋', dept:'外销生产', checker:'王佳成', remark:''},
+  {seq:112, date:'2025-04-22', issue:'统一换鞋', dept:'外销生产', checker:'王佳成', remark:''},
+  {seq:116, date:'2025-11-02', issue:'无', dept:'外销工程', checker:'童旭姐', remark:''},
+  {seq:111, date:'2025-04-01', issue:'无', dept:'外销工程', checker:'陈乐', remark:''},
+  {seq:114, date:'2025-08-29', issue:'11楼C栋6号电梯处库管员李天德（50204016）刷快手', dept:'外销工程', checker:'陈乐', remark:''},
+];
+
+const violationData = [
+  {seq:514, dept:'备品库', empId:'50236917', name:'陈梓光', vioTime:'2026-05-05 10:47', location:'11F备品库', type:'玩手机（无智能机权限）', checker:'孙翰元', punish:'遭建', superior:'', status:'未关闭'},
+  {seq:513, dept:'SMT', empId:'50237210', name:'何家远', vioTime:'2026-04-18 23:05', location:'SMT车间C4线', type:'趴在桌子上睡觉', checker:'杨思嘉', punish:'查监控确认属实，书面警告处理', superior:'曹子然', status:'未关闭'},
+  {seq:512, dept:'备品库', empId:'50182892', name:'李超', vioTime:'2026-04-18 05:15', location:'C栋11楼', type:'玩手机（无智能机权限）', checker:'杨思嘉', punish:'', superior:'', status:'未关闭'},
+  {seq:511, dept:'维修', empId:'50229070', name:'范家辉', vioTime:'2026-04-14 05:06', location:'C栋10楼', type:'玩手机（无智能手机权限）', checker:'吴晓清', punish:'', superior:'', status:'未关闭'},
+  {seq:510, dept:'特制课', empId:'60109595', name:'杨致娴', vioTime:'2026-04-08 04:32', location:'2FB-10', type:'打瞌睡', checker:'邓武林', punish:'', superior:'', status:'未关闭'},
+  {seq:509, dept:'特制课', empId:'50233085', name:'黄建国', vioTime:'2026-04-08 04:32', location:'2FB-10', type:'打瞌睡', checker:'邓武林', punish:'', superior:'', status:'未关闭'},
+  {seq:508, dept:'特制课', empId:'60108092', name:'陈卓杰', vioTime:'2026-04-08 04:45', location:'2FB-8', type:'打瞌睡', checker:'邓武林', punish:'经查监控，整个夜间无打盹', superior:'张博文', status:'未关闭'},
+  {seq:507, dept:'特制课', empId:'50217252', name:'何政', vioTime:'2026-04-08 04:45', location:'2FB-9', type:'打瞌睡', checker:'邓武林', punish:'经查监控，只智时间即', superior:'张博文', status:'未关闭'},
+  {seq:506, dept:'特制课', empId:'50142694', name:'陈治升', vioTime:'2026-04-08 04:38', location:'2FC库座', type:'打瞌睡', checker:'邓武林', punish:'', superior:'程行春', status:'未关闭'},
+  {seq:505, dept:'工程部', empId:'50113014', name:'邹学操', vioTime:'2026-04-02 10', location:'6FB办公室', type:'趴在办公室桌椅上睡觉', checker:'郑金珠', punish:'按照员工手册小过处理，谴责违', superior:'盛达成', status:'未关闭'},
+  {seq:504, dept:'备品库', empId:'50240267', name:'胡蒙', vioTime:'2026-04-01 03:40', location:'A栋一楼西别仓库', type:'玩手机（无智能手机权限）', checker:'许诺', punish:'警告处罚，降职为普工', superior:'遭建', status:'未关闭'},
+  {seq:503, dept:'备品库', empId:'50237076', name:'梁忠明', vioTime:'2026-04-01 03:40', location:'A栋一楼西别仓库', type:'玩手机（无智能手机权限）', checker:'许诺', punish:'警告处罚，降职为普工', superior:'遭建', status:'未关闭'},
+  {seq:502, dept:'备品库', empId:'50190455', name:'置业基', vioTime:'2026-03-28 14:00', location:'维修房', type:'违规携带智能机并玩游戏', checker:'朱泽平', punish:'', superior:'孙管渊', status:'未关闭'},
+  {seq:500, dept:'维修', empId:'50156284', name:'杨文涛', vioTime:'2026-02-20 09:30', location:'3FC', type:'在车间吃饭喝粥', checker:'叶正霆', punish:'经沟通确认，属于初次违', superior:'白翁文', status:'未关闭'},
+  {seq:499, dept:'网管', empId:'50204891', name:'高彦雄', vioTime:'2026-02-14 08:50', location:'4FC车间', type:'在车间吃饭喝粥', checker:'叶正霆', punish:'经沟通确认，属于初次 白翁文', superior:'白翁文', status:'未关闭'},
+];
+
+// ===== RENDER TABLES =====
+function renderTimeTable() {
+  const tbody = document.getElementById('tbody-time');
+  tbody.innerHTML = timeData.map(r => `
+    <tr onclick="selectRow(this)">
+      <td>${r.seq}</td>
+      <td>${r.sysTime}</td>
+      <td>${r.startTime}</td>
+      <td>${r.endTime}</td>
+      <td>${r.area}</td>
+      <td>${r.inspector}</td>
+      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis">${r.remark}</td>
+      <td><span style="display:flex;gap:3px">
+        <button class="action-btn action-edit" title="编辑" onclick="openAuditModal(event)"><i class="fas fa-edit"></i></button>
+        <button class="action-btn action-del" title="删除" onclick="confirmDel(event)"><i class="fas fa-trash"></i></button>
+      </span></td>
+    </tr>`).join('');
+}
+
+function renderImproveTable() {
+  const tbody = document.getElementById('tbody-improve');
+  tbody.innerHTML = improveData.map(r => `
+    <tr onclick="selectRow(this)">
+      <td>${r.seq}</td>
+      <td>${r.date}</td>
+      <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis">${r.issue}</td>
+      <td>${r.dept}</td>
+      <td>${r.checker}</td>
+      <td>${r.remark}</td>
+      <td><span style="display:flex;gap:3px">
+        <button class="action-btn action-edit" title="编辑" onclick="openImproveModal(event)"><i class="fas fa-edit"></i></button>
+        <button class="action-btn action-del" title="删除" onclick="confirmDel(event)"><i class="fas fa-trash"></i></button>
+      </span></td>
+    </tr>`).join('');
+}
+
+function renderViolationTable() {
+  const tbody = document.getElementById('tbody-violation');
+  tbody.innerHTML = violationData.map(r => `
+    <tr onclick="selectRow(this)">
+      <td>${r.seq}</td>
+      <td>${r.dept}</td>
+      <td>${r.empId}</td>
+      <td>${r.name}</td>
+      <td>${r.vioTime}</td>
+      <td>${r.location}</td>
+      <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis">${r.type}</td>
+      <td>${r.checker}</td>
+      <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis">${r.punish}</td>
+      <td>${r.superior}</td>
+      <td><span class="${r.status==='未关闭'?'badge-open':'badge-closed'}">${r.status}</span></td>
+      <td><span style="display:flex;gap:3px">
+        <button class="action-btn action-view" title="跟进" onclick="openVioDetail(event)"><i class="fas fa-eye"></i></button>
+        <button class="action-btn action-edit" title="编辑" onclick="openVioDetail(event)"><i class="fas fa-edit"></i></button>
+        <button class="action-btn action-del" title="删除" onclick="confirmDel(event)"><i class="fas fa-trash"></i></button>
+      </span></td>
+    </tr>`).join('');
+}
+
+// ===== UI INTERACTIONS =====
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('collapsed');
+}
+
+function toggleMenu(id, el) {
+  const menu = document.getElementById(id);
+  menu.classList.toggle('open');
+  el.classList.toggle('open');
+}
+
+function switchModule(modId, navEl, tabId) {
+  document.querySelectorAll('.module-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById(modId).classList.add('active');
+
+  document.querySelectorAll('.mod-tab').forEach(t => t.classList.remove('active'));
+  const tabMap = {'mod-time':'tab-time','mod-improve':'tab-improve','mod-violation':'tab-violation'};
+  if(tabMap[modId]) document.getElementById(tabMap[modId])?.classList.add('active');
+  else if(tabId) document.getElementById(tabId)?.classList.add('active');
+
+  if(navEl) {
+    document.querySelectorAll('.nav-submenu .nav-link').forEach(l => l.classList.remove('active'));
+    navEl.classList.add('active');
+  }
+}
+
+function selectRow(tr) {
+  const table = tr.closest('table');
+  table.querySelectorAll('tr').forEach(r => r.classList.remove('selected'));
+  tr.classList.add('selected');
+}
+
+function openAuditModal(e) { if(e) e.stopPropagation(); document.getElementById('modal-audit').classList.add('open'); }
+function openImproveModal(e) { if(e) e.stopPropagation(); document.getElementById('modal-improve').classList.add('open'); }
+function openVioDetail(e) { if(e) e.stopPropagation(); document.getElementById('modal-vio-detail').classList.add('open'); }
+function openViolationModal(e) { if(e) e.stopPropagation(); document.getElementById('modal-vio-detail').classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+function toggleColMenu(id) {
+  document.querySelectorAll('.col-toggle-dropdown').forEach(d => { if(d.id !== id) d.classList.remove('open'); });
+  document.getElementById(id).classList.toggle('open');
+}
+
+function searchData() { showToast('查询中...', 'info'); }
+function sortTable(tbl, col) { showToast(`按 ${col} 排序`, 'info'); }
+function toggleCol(prefix, idx) { }
+
+function confirmDel(e) {
+  e.stopPropagation();
+  if(confirm('确认删除此记录？')) showToast('记录已删除', 'success');
+}
+
+function saveAudit() {
+  const start = document.getElementById('audit-start').value;
+  const end = document.getElementById('audit-end').value;
+  if(!start || !end) { showToast('请填写必填项（开始/结束时间）', 'error'); return; }
+  closeModal('modal-audit');
+  showToast('巡检信息保存成功', 'success');
+}
+
+function saveImprove() {
+  closeModal('modal-improve');
+  showToast('改善项目保存成功', 'success');
+}
+
+function saveViolation() {
+  closeModal('modal-vio-detail');
+  showToast('违纪信息已更新', 'success');
+}
+
+// ===== TOAST =====
+function showToast(msg, type='info') {
+  const icons = {success:'fa-check-circle',error:'fa-times-circle',info:'fa-info-circle'};
+  const colors = {success:'#2e7d32',error:'#c62828',info:'#1565C0'};
+  const el = document.createElement('div');
+  el.className = `toast-msg ${type}`;
+  el.innerHTML = `<i class="fas ${icons[type]}" style="color:${colors[type]}"></i> ${msg}`;
+  document.getElementById('toastContainer').appendChild(el);
+  setTimeout(() => el.remove(), 3000);
+}
+
+// Close dropdowns on outside click
+document.addEventListener('click', e => {
+  if(!e.target.closest('[onclick*="toggleColMenu"]') && !e.target.closest('.col-toggle-dropdown')) {
+    document.querySelectorAll('.col-toggle-dropdown').forEach(d => d.classList.remove('open'));
+  }
+});
+
+// Close modal on overlay click
+document.querySelectorAll('.modal-overlay').forEach(ov => {
+  ov.addEventListener('click', e => { if(e.target === ov) ov.classList.remove('open'); });
+});
+
+// Set today's date on audit modal open
+document.getElementById('audit-start').value = new Date().toISOString().slice(0,16);
+document.getElementById('audit-end').value = new Date().toISOString().slice(0,16);
+document.getElementById('improve-date').value = new Date().toISOString().slice(0,10);
+
+// INIT
+renderTimeTable();
+renderImproveTable();
+renderViolationTable();
+</script>
+
+  <!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+ <!-- Custom JS -->
+<script src="static/css/app.css"></script>
+
+</body>
+</html>

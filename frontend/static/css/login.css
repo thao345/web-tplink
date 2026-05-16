@@ -1,0 +1,254 @@
+
+  /* ── Fonts ─────────────────────────────────────────── */
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap');
+
+  /* ── Variables ──────────────────────────────────────── */
+  :root {
+    --primary:      #1a3a5c;
+    --primary-dark: #112840;
+    --accent:       #2e7df7;
+    --accent-light: #5da0ff;
+    --success:      #22c55e;
+    --danger:       #ef4444;
+    --bg:           #0d1f33;
+    --bg2:          #112840;
+    --surface:      #16304f;
+    --border:       rgba(46,125,247,.25);
+    --text:         #e2ecf8;
+    --text-muted:   #7fa8cc;
+    --shadow:       0 8px 40px rgba(0,0,0,.45);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Be Vietnam Pro', 'Noto Sans SC', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* ── Animated background ──────────────────────────── */
+  .bg-layer {
+    position: fixed; inset: 0; z-index: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 80%, rgba(30,80,160,.35) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 80% 20%, rgba(20,60,120,.3) 0%, transparent 55%),
+      linear-gradient(160deg, #0a1828 0%, #0d2040 50%, #0a1828 100%);
+  }
+
+  .grid-lines {
+    position: fixed; inset: 0; z-index: 0; opacity: .07;
+    background-image:
+      linear-gradient(rgba(46,125,247,.8) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(46,125,247,.8) 1px, transparent 1px);
+    background-size: 60px 60px;
+    animation: gridMove 20s linear infinite;
+  }
+  @keyframes gridMove {
+    from { background-position: 0 0; }
+    to   { background-position: 60px 60px; }
+  }
+
+  .float-dot {
+    position: fixed; border-radius: 50%; z-index: 0;
+    background: radial-gradient(circle, rgba(46,125,247,.6), transparent 70%);
+    animation: floatAnim linear infinite;
+  }
+  @keyframes floatAnim {
+    0%   { transform: translateY(0)   scale(1);   opacity: .4; }
+    50%  { transform: translateY(-40px) scale(1.1); opacity: .7; }
+    100% { transform: translateY(0)   scale(1);   opacity: .4; }
+  }
+
+  /* ── Card ────────────────────────────────────────────── */
+  .login-card {
+    position: relative; z-index: 10;
+    width: 420px;
+    background: rgba(22, 48, 79, 0.85);
+    backdrop-filter: blur(18px) saturate(1.5);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 44px 40px 40px;
+    box-shadow: var(--shadow), 0 0 0 1px rgba(46,125,247,.08);
+    animation: cardIn .6s cubic-bezier(.22,1,.36,1) both;
+  }
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(28px) scale(.97); }
+    to   { opacity: 1; transform: translateY(0)    scale(1); }
+  }
+
+  /* ── Logo / Brand ───────────────────────────────────── */
+  .brand {
+    text-align: center;
+    margin-bottom: 34px;
+  }
+  .brand-icon {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 64px; height: 64px; border-radius: 18px;
+    background: linear-gradient(135deg, var(--accent), #1250c0);
+    box-shadow: 0 6px 24px rgba(46,125,247,.45);
+    margin-bottom: 16px;
+    font-size: 28px; color: #fff;
+  }
+  .brand-title {
+    font-family: 'Noto Sans SC', sans-serif;
+    font-size: 20px; font-weight: 700;
+    color: var(--text);
+    letter-spacing: .04em;
+    line-height: 1.3;
+  }
+  .brand-sub {
+    font-size: 12px; color: var(--text-muted);
+    margin-top: 4px; letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+
+  /* ── Divider ────────────────────────────────────────── */
+  .divider {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 28px;
+  }
+  .divider::before, .divider::after {
+    content: ''; flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(46,125,247,.3), transparent);
+  }
+  .divider span {
+    font-size: 11px; color: var(--text-muted);
+    letter-spacing: .12em; white-space: nowrap;
+  }
+
+  /* ── Form ────────────────────────────────────────────── */
+  .form-group {
+    margin-bottom: 20px;
+  }
+  .form-label {
+    display: block;
+    font-size: 12px; font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: .1em; text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .input-wrap {
+    position: relative;
+  }
+  .input-icon {
+    position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+    color: var(--text-muted); font-size: 14px;
+    transition: color .2s;
+  }
+  .form-control {
+    width: 100%;
+    padding: 12px 14px 12px 42px;
+    background: rgba(10, 25, 50, 0.6);
+    border: 1px solid rgba(46,125,247,.2);
+    border-radius: 10px;
+    color: var(--text);
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color .25s, box-shadow .25s, background .25s;
+  }
+  .form-control::placeholder { color: rgba(127,168,204,.5); }
+  .form-control:focus {
+    border-color: var(--accent);
+    background: rgba(10, 25, 50, 0.8);
+    box-shadow: 0 0 0 3px rgba(46,125,247,.15);
+  }
+  .form-control:focus ~ .input-icon,
+  .input-wrap:focus-within .input-icon { color: var(--accent); }
+
+  /* Eye toggle */
+  .eye-btn {
+    position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+    background: none; border: none; cursor: pointer;
+    color: var(--text-muted); font-size: 14px;
+    padding: 4px; transition: color .2s;
+  }
+  .eye-btn:hover { color: var(--accent); }
+
+  /* ── Remember me ─────────────────────────────────────── */
+  .remember-row {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 24px;
+  }
+  .remember-row input[type=checkbox] {
+    width: 16px; height: 16px; accent-color: var(--accent);
+    cursor: pointer;
+  }
+  .remember-row label {
+    font-size: 13px; color: var(--text-muted); cursor: pointer;
+    user-select: none;
+  }
+
+  /* ── Submit button ───────────────────────────────────── */
+  .btn-login {
+    width: 100%;
+    padding: 13px;
+    background: linear-gradient(135deg, var(--accent), #1250c0);
+    border: none; border-radius: 10px;
+    color: #fff; font-size: 15px; font-weight: 600;
+    font-family: inherit;
+    cursor: pointer; letter-spacing: .04em;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    box-shadow: 0 4px 20px rgba(46,125,247,.35);
+    transition: opacity .2s, transform .15s, box-shadow .2s;
+  }
+  .btn-login:hover:not(:disabled) {
+    opacity: .9; transform: translateY(-1px);
+    box-shadow: 0 6px 28px rgba(46,125,247,.5);
+  }
+  .btn-login:active:not(:disabled) { transform: translateY(0); }
+  .btn-login:disabled { opacity: .55; cursor: not-allowed; }
+
+  /* Loading spinner inside button */
+  .spinner {
+    display: none;
+    width: 17px; height: 17px;
+    border: 2px solid rgba(255,255,255,.4);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin .65s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Error / Success alert ───────────────────────────── */
+  .alert {
+    display: none;
+    padding: 11px 14px;
+    border-radius: 9px;
+    font-size: 13px;
+    margin-top: 18px;
+    align-items: center; gap: 10px;
+  }
+  .alert.show { display: flex; animation: fadeIn .25s ease; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
+
+  .alert-error {
+    background: rgba(239,68,68,.12);
+    border: 1px solid rgba(239,68,68,.3);
+    color: #fca5a5;
+  }
+  .alert-success {
+    background: rgba(34,197,94,.12);
+    border: 1px solid rgba(34,197,94,.3);
+    color: #86efac;
+  }
+
+  /* ── Footer ──────────────────────────────────────────── */
+  .card-footer {
+    text-align: center;
+    margin-top: 28px;
+    font-size: 11px; color: rgba(127,168,204,.45);
+    letter-spacing: .06em;
+  }
+
+  /* ── Responsive ──────────────────────────────────────── */
+  @media (max-width: 480px) {
+    .login-card { width: 92vw; padding: 32px 24px 28px; }
+  }
