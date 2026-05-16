@@ -85,7 +85,7 @@ CREATE TABLE dbo.KIEM_TRA_THOI_GIAN (
     ngay_cap_nhat   DATETIME2,
     nguoi_cap_nhat  NVARCHAR(50)
 );
-
+ 
 -- ============================================================
 -- 5. HANG_MUC_CAI_THIEN (Improvement Items / 要改善项目登记)
 -- ============================================================

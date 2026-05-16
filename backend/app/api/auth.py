@@ -31,6 +31,7 @@ def login(data: dict):      # nhận data từ frontend
             "id": user.id,
             "username": user.ten_dang_nhap,
             "password" : user.mat_khau,
-            "full_name": user.ho_ten
+            "full_name": user.ho_ten,
+            "ma_nv" : user.ma_nv
         }
     }

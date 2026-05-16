@@ -7,7 +7,7 @@ from app.core.db import get_connection
 # GET LIST
 # ─────────────────────────────────────────────
 def get_list_kiemtra(
-    ma_nv=None,
+    keyword=None,
     tu_ngay=None,
     den_ngay=None,
     page=1,
@@ -18,14 +18,14 @@ def get_list_kiemtra(
 
     cursor.execute("""
         EXEC dbo.SP_KiemTra_GetList
-            @ma_nv=?,
+            @keyword=?,
             @tu_ngay=?,
             @den_ngay=?,
             @page=?,
             @page_size=?
     """,
     (
-        ma_nv,
+        keyword,
         tu_ngay,
         den_ngay,
         page,
@@ -85,7 +85,7 @@ def get_kiemtra_view(id):
         "khu_vuc": rows[0]["khu_vuc"],
         "ma_nv_kiem_tra": rows[0]["ma_nv_kiem_tra"],
         "ten_nguoi_kiem_tra": rows[0]["ten_nguoi_kiem_tra"],
-        "ghi_chu": rows[0]["ghi_chu"],
+        "ghi_chu_kiemtra": rows[0]["ghi_chu_kiemtra"],
     }
 
     # CHILDREN
@@ -107,7 +107,7 @@ def get_kiemtra_view(id):
                 "ngay_kiem_tra": r["ngay_kiem_tra"],
                 "ten_bo_phan_phu_trach": r["ten_bo_phan_phu_trach"],
                 "hien_tuong": r["hien_tuong"],
-                "ghi_chu": r["ghi_chu"],
+                "ghi_chu_caithien": r["ghi_chu_caithien"],
             })
 
         # VI PHẠM

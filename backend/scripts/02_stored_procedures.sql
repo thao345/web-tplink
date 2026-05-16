@@ -8,7 +8,7 @@ GO
 DROP PROCEDURE IF EXISTS dbo.SP_NhanVien_GetList;
 GO
 -- ============================================================
--- SP_AUTH: Xác thực đăng nhập
+ 
 -- ============================================================
 CREATE OR ALTER PROCEDURE dbo.SP_Auth_Login
     @ten_dang_nhap  NVARCHAR(50),
@@ -299,9 +299,9 @@ EXEC dbo.SP_TrucBan_Delete @id =7;
 -- ============================================================
 -- SP_KIEM_TRA: Inspection Time Records
 -- ============================================================
-
+ --tìm theo mã và tên nhân viên
 CREATE OR ALTER   PROCEDURE [dbo].[SP_KiemTra_GetList]
-    @ma_nv      NVARCHAR(20)  = NULL,
+    @keyword    NVARCHAR(100) = NULL,
     @tu_ngay    DATETIME2     = NULL,
     @den_ngay   DATETIME2     = NULL,
     @page       INT           = 1,
@@ -326,7 +326,7 @@ BEGIN
         COUNT(*) OVER() AS total_count
     FROM dbo.KIEM_TRA_THOI_GIAN kt
     LEFT JOIN dbo.NHAN_VIEN nv ON nv.ma_nv = kt.ma_nv_kiem_tra
-    WHERE (@ma_nv   IS NULL OR kt.ma_nv_kiem_tra = @ma_nv)
+    WHERE ( @keyword IS NULL OR kt.ma_nv_kiem_tra LIKE '%' + @keyword + '%' OR nv.ho_ten LIKE '%' + @keyword + '%')
       AND (@tu_ngay IS NULL OR kt.thoi_gian_bat_dau >= @tu_ngay)
       AND (@den_ngay IS NULL OR kt.thoi_gian_bat_dau < DATEADD(DAY, 1, @den_ngay))
 
@@ -337,13 +337,14 @@ END;
 GO
 EXEC dbo.SP_KiemTra_GetList;
 EXEC dbo.SP_KiemTra_GetList
-    @ma_nv = 'ADM001';
+    @keyword = '东';
 EXEC dbo.SP_KiemTra_GetList
     @tu_ngay = '2026-05-01',
     @den_ngay = '2026-05-12';
 EXEC dbo.SP_KiemTra_GetList
     @page = 1,
     @page_size = 10;
+
 
 -- View của thông tin KIEM TRA, CAI THIEN, VI PHẠM
 CREATE OR ALTER PROCEDURE dbo.SP_KiemTra_GetById_View
@@ -360,13 +361,13 @@ BEGIN
         kt.khu_vuc,
         kt.ma_nv_kiem_tra,
         nv.ho_ten AS ten_nguoi_kiem_tra,
-        kt.ghi_chu,
+        kt.ghi_chu as ghi_chu_kiemtra,
 
 		ct.id AS cai_thien_id,
 		ct.ngay_kiem_tra,
 		ct.ten_bo_phan_phu_trach,
         ct.hien_tuong,
-		ct.ghi_chu,
+		ct.ghi_chu as ghi_chu_caithien,
 
         vp.id AS vi_pham_id,
 		vp.ten_bo_phan,
@@ -391,7 +392,7 @@ BEGIN
     WHERE kt.id = @id;
 END;
 GO
-exec dbo.SP_KiemTra_GetById_View @id =8
+exec dbo.SP_KiemTra_GetById_View @id =11
 
 -- Insert tổng hợp: 1 lần kiểm tra có thể có cải thiện + vi phạm
 CREATE OR ALTER PROCEDURE dbo.SP_KiemTra_Insert
@@ -447,7 +448,7 @@ BEGIN
 END;
 GO
 EXEC dbo.SP_KiemTra_Update
-    @id                 = 4,
+    @id                 = 10,
     @thoi_gian_bat_dau  = '2026-05-13 08:30:00',
     @thoi_gian_ket_thuc = '2026-05-13 10:30:00',
     @khu_vuc            = N'4-5楼,6-8楼 new',

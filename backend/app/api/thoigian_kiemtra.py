@@ -17,7 +17,7 @@ router = APIRouter()
 # ═══════════════════════════════════════════════
 @router.get("/api/kiemtrathoigian")
 def api_get_kiemtra_list(
-    ma_nv: str | None = Query(None),
+    keyword: str | None = Query(None),
     tu_ngay: str | None = Query(None),
     den_ngay: str | None = Query(None),
     page: int = Query(1),
@@ -27,7 +27,7 @@ def api_get_kiemtra_list(
     try:
 
         result = get_list_kiemtra(
-            ma_nv=ma_nv,
+            keyword=keyword,
             tu_ngay=tu_ngay,
             den_ngay=den_ngay,
             page=page,

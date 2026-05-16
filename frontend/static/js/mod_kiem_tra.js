@@ -1,163 +1,476 @@
 /**
- * mod_kiem_tra.js — Module 巡检时间登记
- * Phụ thuộc: api.js, toast.js, table.js, modal.js
+ * mod_kiem_tra.js
+ * CRUD Kiểm Tra Thời Gian
+ * API: http://127.0.0.1:8000/api/kiemtrathoigian
  */
 
+function getUsername() {
+    return localStorage.getItem("username") || "admin";
+}
+
+function formatDateTime(value) {
+
+    if (!value) return '';
+
+    const d = new Date(value);
+
+    const yyyy = d.getFullYear();
+
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+
+    const dd = String(d.getDate()).padStart(2, '0');
+
+    const hh = String(d.getHours()).padStart(2, '0');
+
+    const mi = String(d.getMinutes()).padStart(2, '0');
+
+    return `${yyyy}-${mm}-${dd} ${hh}:${mi}`;
+}
+
 const KiemTra = (() => {
-  let state = { page: 1, pageSize: 25, total: 0, sort_col: 'thoi_gian_bat_dau', sort_dir: 'DESC' };
 
-  /* ── Load danh sách ──────────────────────────────── */
-  async function loadList() {
-    const keyword = document.getElementById('kt-search-inspector')?.value || '';
-    try {
-      const res = await apiGet('/kiem-tra', {
-        keyword, page: state.page, page_size: state.pageSize,
-        sort_col: state.sort_col, sort_dir: state.sort_dir,
-      });
-      state.total = res.total;
-      renderTable(res.data);
-      renderPagination('pag-info-time', 'pag-btns-time', {
-        page: state.page, pageSize: state.pageSize, total: state.total,
-        onPageChange: p => { state.page = p; loadList(); },
-      });
-    } catch (err) {
-      showToast('Lỗi tải dữ liệu kiểm tra', 'error');
-    }
-  }
+    const API = "http://127.0.0.1:8000/api/kiemtrathoigian";
 
-  /* ── Render tbody ────────────────────────────────── */
-  function renderTable(rows) {
-    const tbody = document.getElementById('tbody-time');
-    if (!rows || rows.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--text-muted)">Không có dữ liệu</td></tr>';
-      return;
-    }
-    tbody.innerHTML = rows.map(r => `
-      <tr onclick="selectRow(this)" data-id="${r.id}">
-        <td>${r.id}</td>
-        <td>${r.thoi_gian_he_thong || ''}</td>
-        <td>${r.thoi_gian_bat_dau || ''}</td>
-        <td>${r.thoi_gian_ket_thuc || ''}</td>
-        <td>${r.khu_vuc || ''}</td>
-        <td>${r.ho_ten || r.ma_nv_kiem_tra || ''}</td>
-        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis" title="${r.ghi_chu || ''}">${r.ghi_chu || ''}</td>
-        <td><span style="display:flex;gap:3px">
-          <button class="action-btn action-edit" title="Sửa" onclick="KiemTra.openEdit(event,${r.id})"><i class="fas fa-edit"></i></button>
-          <button class="action-btn action-del"  title="Xóa" onclick="KiemTra.del(event,${r.id})"><i class="fas fa-trash"></i></button>
-        </span></td>
-      </tr>`).join('');
-  }
-
-  /* ── Mở modal thêm mới ───────────────────────────── */
-  function openAdd() {
-    document.getElementById('kt-form-id').value = '';
-    document.getElementById('audit-start').value = new Date().toISOString().slice(0, 16);
-    document.getElementById('audit-end').value   = new Date().toISOString().slice(0, 16);
-    document.getElementById('audit-remark').value = '';
-    // Reset improve & violation fields
-    document.getElementById('improve-issue').value   = '';
-    document.getElementById('improve-remark').value  = '';
-    document.getElementById('vio-location').value    = '';
-    document.getElementById('vio-phenomenon').value  = '';
-    openModal('modal-audit');
-  }
-
-  /* ── Mở modal sửa ────────────────────────────────── */
-  async function openEdit(e, id) {
-    e.stopPropagation();
-    try {
-      const res = await apiGet(`/kiem-tra/${id}`);
-      const r = res.data;
-      document.getElementById('kt-form-id').value     = r.id;
-      document.getElementById('audit-start').value    = r.thoi_gian_bat_dau?.slice(0, 16) || '';
-      document.getElementById('audit-end').value      = r.thoi_gian_ket_thuc?.slice(0, 16) || '';
-      document.getElementById('audit-remark').value   = r.ghi_chu || '';
-      // Chọn khu vực (multi-select)
-      const areas = (r.khu_vuc || '').split(',').map(s => s.trim());
-      Array.from(document.getElementById('audit-area').options).forEach(opt => {
-        opt.selected = areas.includes(opt.value);
-      });
-      openModal('modal-audit');
-    } catch {
-      showToast('Không tải được dữ liệu', 'error');
-    }
-  }
-
-  /* ── Lưu (thêm + sửa) ───────────────────────────── */
-  async function save() {
-    const id    = document.getElementById('kt-form-id').value;
-    const start = document.getElementById('audit-start').value;
-    const end   = document.getElementById('audit-end').value;
-    if (!start || !end) { showToast('Vui lòng nhập thời gian bắt đầu và kết thúc', 'error'); return; }
-
-    const areaSelect = document.getElementById('audit-area');
-    const khu_vuc = Array.from(areaSelect.selectedOptions).map(o => o.value).join(', ');
-
-    const payload = {
-      thoi_gian_bat_dau:  start,
-      thoi_gian_ket_thuc: end,
-      khu_vuc,
-      ghi_chu: document.getElementById('audit-remark').value,
-      // Cải thiện đi kèm
-      cai_thien: {
-        ten_bo_phan_phu_trach: document.getElementById('improve-dept')?.value || '',
-        hien_tuong:            document.getElementById('improve-issue')?.value || '',
-        ghi_chu:               document.getElementById('improve-remark')?.value || '',
-      },
-      // Vi phạm đi kèm
-      vi_pham: {
-        ten_bo_phan:       document.getElementById('vio-dept')?.value || '',
-        ma_nv:             document.getElementById('vio-empid')?.value || '',
-        ho_ten:            document.getElementById('vio-name')?.value || '',
-        thoi_gian_vi_pham: document.getElementById('vio-time')?.value || '',
-        dia_diem:          document.getElementById('vio-location')?.value || '',
-        ten_cap_tren:      document.getElementById('vio-superior')?.value || '',
-        email_cc:          document.getElementById('vio-cc')?.value || '',
-        hien_tuong_vi_pham:document.getElementById('vio-phenomenon')?.value || '',
-      },
+    let state = {
+        page: 1,
+        pageSize: 25,
+        total: 0
     };
 
-    try {
-      if (id) {
-        await apiPut(`/kiem-tra/${id}`, payload);
-        showToast('Cập nhật thành công', 'success');
-      } else {
-        await apiPost('/kiem-tra', payload);
-        showToast('Thêm mới thành công', 'success');
-      }
-      closeModal('modal-audit');
-      loadList();
-    } catch (err) {
-      showToast(err.message || 'Lưu thất bại', 'error');
+    // ─────────────────────────────────────────────
+    // TOKEN
+    // ─────────────────────────────────────────────
+    function getToken() {
+        return localStorage.getItem("access_token") || "";
     }
-  }
 
-  /* ── Xóa ─────────────────────────────────────────── */
-  async function del(e, id) {
-    e.stopPropagation();
-    if (!confirm('Xác nhận xóa bản ghi này?')) return;
-    try {
-      await apiDel(`/kiem-tra/${id}`);
-      showToast('Đã xóa bản ghi', 'success');
-      loadList();
-    } catch {
-      showToast('Xóa thất bại', 'error');
+    function getHeaders() {
+        return {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${getToken()}`
+        };
     }
-  }
 
-  /* ── Sort ────────────────────────────────────────── */
-  function sort(col) {
-    if (state.sort_col === col) {
-      state.sort_dir = state.sort_dir === 'ASC' ? 'DESC' : 'ASC';
-    } else {
-      state.sort_col = col; state.sort_dir = 'ASC';
+    // ─────────────────────────────────────────────
+    // SEARCH
+    // ─────────────────────────────────────────────
+    function search() {
+
+        state.keyword = $('#kt-search-inspector').val().trim();
+
+        state.page = 1;
+
+        loadList();
     }
-    state.page = 1;
-    loadList();
-  }
 
-  return { loadList, openAdd, openEdit, save, del, sort };
+    // ─────────────────────────────────────────────
+    // REFRESH
+    // ─────────────────────────────────────────────
+    function refresh() {
+
+        $('#kt-search-inspector').val('');
+
+        state.keyword = '';
+
+        state.page = 1;
+
+        loadList();
+    }
+
+    // ─────────────────────────────────────────────
+    // LOAD LIST
+    // ─────────────────────────────────────────────
+    async function loadList() {
+
+        state.keyword = $('#kt-search-inspector').val().trim();
+
+        let url = `${API}?`;
+
+        const params = [];
+
+        if (state.keyword) {
+            params.push(
+                `keyword=${encodeURIComponent(state.keyword)}`
+            );
+        }
+
+        params.push(`page=${state.page}`);
+        params.push(`page_size=${state.pageSize}`);
+
+        url += params.join('&');
+
+        try {
+
+            const res = await fetch(url, {
+                method: 'GET',
+                headers: getHeaders()
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.detail || 'Load failed');
+            }
+
+            renderTable(data.data || []);
+            renderPagination(data.data[0]?.total_count || 0);
+
+        } catch (err) {
+
+            console.error(err);
+            showToast(err.message, 'error');
+        }
+    }
+
+    // ─────────────────────────────────────────────
+    // RENDER TABLE
+    // ─────────────────────────────────────────────
+    function renderTable(rows) {
+
+        const tbody = $('#tbody-time');
+
+        if (!rows || rows.length === 0) {
+
+            tbody.html(`
+        <tr>
+          <td colspan="11" style="text-align:center;padding:20px" data-i18n="noData>
+            Không có dữ liệu
+          </td>
+        </tr>
+      `);
+            applyLang();
+            return;
+        }
+
+        let html = '';
+
+        rows.forEach((r, index) => {
+
+            html += `
+        <tr>
+
+          <td>
+            ${((state.page - 1) * state.pageSize) + index + 1}
+          </td>
+
+        <td>${formatDateTime(r.thoi_gian_he_thong)}</td>
+
+        <td>${formatDateTime(r.thoi_gian_bat_dau)}</td>
+
+        <td>${formatDateTime(r.thoi_gian_ket_thuc)}</td>
+
+          <td>${r.khu_vuc || ''}</td>
+
+           <td>
+            ${r.ten_nguoi_kiem_tra || ''}
+            <br>
+            <small style="color:#888">${r.ma_nv_kiem_tra || ''}</small>
+          </td>
+
+          <td>${r.ghi_chu || ''}</td>
+
+          <td>
+
+            <button onclick="KiemTra.openEdit(${r.id})" data-i18n="edit">
+              Sửa
+            </button>
+
+            <button onclick="KiemTra.delete(${r.id})" data-i18n="delete">
+             Xóa
+            </button>
+
+          </td>
+
+        </tr>
+      `;
+        });
+
+        tbody.html(html);
+
+        applyLang(); // <- bắt buộc để re-translate sau khi render
+    }
+
+    // ─────────────────────────────────────────────
+    // PAGINATION
+    // ─────────────────────────────────────────────
+    function renderPagination(total) {
+
+        state.total = total;
+
+        const totalPages = Math.ceil(total / state.pageSize);
+
+        const text = i18n[currentLang].totalRecords || 'Total records';
+
+        $('#pag-info-time').text(`${text}: ${total}`);
+
+        let html = '';
+
+        for (let i = 1; i <= totalPages; i++) {
+
+            html += `
+        <button
+          class="pag-btn ${i === state.page ? 'active' : ''}"
+          onclick="KiemTra.goPage(${i})"
+        >
+          ${i}
+        </button>
+      `;
+        }
+
+        $('#pag-btns-time').html(html);
+    }
+
+    // ─────────────────────────────────────────────
+    // GO PAGE
+    // ─────────────────────────────────────────────
+    function goPage(page) {
+
+        state.page = page;
+
+        loadList();
+    }
+
+    // ─────────────────────────────────────────────
+    // OPEN ADD (mở modal)
+    // ─────────────────────────────────────────────
+    function openAdd() {
+
+        $('#kt-form-id').val('');
+
+        const maNV = localStorage.getItem('ma_nv');
+        const hoTen = localStorage.getItem('ho_ten');
+        // console.log(hoTen);
+        // console.log(maNV);
+        // thông tin nhân viên lấy từ tài khoản đăng nhập
+        $('#MaNguoikiemtra-inspector').val(
+            maNV || ''
+        );
+        $('#Tenkiemtra-inspector').val(
+            hoTen || ''
+        );
+
+        $('#audit-start').val('');
+        $('#audit-end').val('');
+        $('#audit-area-text').val('');
+        $('#audit-remark').val('');
+
+        // disable phần cải thiện + vi phạm
+        $('.left-panel :input').prop('disabled', true);
+        $('.right-panel :input').prop('disabled', true);
+
+        // thêm hiệu ứng disabled
+        $('.left-panel').addClass('disabled-panel');
+        $('.right-panel').addClass('disabled-panel');
+
+        openModal('modal-audit');
+    }
+    // ─────────────────────────────────────────────
+    // OPEN EDIT
+    // ─────────────────────────────────────────────
+    async function openEdit(id) {
+
+        try {
+
+            const res = await fetch(`${API}/${id}`, {
+                method: 'GET',
+                headers: getHeaders()
+            });
+
+            const result = await res.json();
+
+            if (!res.ok) {
+                throw new Error(result.detail || 'Load failed');
+            }
+            //  console.log(result);
+
+            // lấy object  của kiemtra
+            const data = result.master || {};
+            const maNV = localStorage.getItem('ma_nv');
+            const hoTen = localStorage.getItem('ho_ten');
+            // console.log(hoTen);
+            // console.log(maNV);
+            // thông tin nhân viên lấy từ tài khoản đăng nhập
+            $('#MaNguoikiemtra-inspector').val(
+                maNV || ''
+            );
+            $('#Tenkiemtra-inspector').val(
+                hoTen || ''
+            );
+            $('#kt-form-id').val(data.id || '');
+
+            $('#audit-start').val(formatDateTimeLocal(data.thoi_gian_bat_dau));
+            $('#audit-end').val(formatDateTimeLocal(data.thoi_gian_ket_thuc));
+
+            $('#audit-area-text').val(data.khu_vuc || '');
+
+            $('#audit-remark').val(data.ghi_chu_kiemtra || '');
+
+            // enable
+            $('.left-panel :input').prop('disabled', false);
+            $('.left-panel textarea').prop('disabled', false);
+            $('.left-panel select').prop('disabled', false);
+
+            $('.right-panel :input').prop('disabled', false);
+            $('.right-panel textarea').prop('disabled', false);
+
+            // cho phép nhập cải thiện và vi phạm   
+            $('.left-panel').removeClass('disabled-panel');
+            $('.right-panel').removeClass('disabled-panel');
+
+            openModal('modal-audit');
+
+        } catch (err) {
+
+            console.error(err);
+            showToast(err.message, 'error');
+        }
+    }
+
+    // ─────────────────────────────────────────────
+    // SAVE
+    // ─────────────────────────────────────────────
+    async function save() {
+
+        const id = $('#kt-form-id').val();
+
+        const body = {
+
+            thoi_gian_bat_dau:
+                $('#audit-start').val().replace('T', ' ') + ':00',
+
+            thoi_gian_ket_thuc:
+                $('#audit-end').val().replace('T', ' ') + ':00',
+
+            khu_vuc:
+                $('#audit-area-text').val(),
+
+            ghi_chu:
+                $('#audit-remark').val(),
+
+            ma_nv_kiem_tra:
+                localStorage.getItem('ma_nv'),
+
+            nguoi_tao:
+                getUsername(),
+
+            nguoi_cap_nhat:
+                getUsername()
+        };
+
+        try {
+
+            let res;
+
+            // INSERT
+            if (!id) {
+
+                res = await fetch(API, {
+                    method: 'POST',
+                    headers: getHeaders(),
+                    body: JSON.stringify(body)
+                });
+
+            } else {
+
+                // UPDATE
+                res = await fetch(`${API}/${id}`, {
+                    method: 'PUT',
+                    headers: getHeaders(),
+                    body: JSON.stringify(body)
+                });
+            }
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.detail || 'Save failed');
+            }
+
+            showToast(i18n[currentLang].staffSaveSuccess, 'success');
+
+            closeModal('modal-audit');
+
+            loadList();
+
+        } catch (err) {
+
+            console.error(err);
+
+            showToast(err.message, 'error');
+        }
+    }
+
+    // ─────────────────────────────────────────────
+    // DELETE
+    // ─────────────────────────────────────────────
+    async function del(id) {
+
+        const dict = i18n[currentLang];
+
+        if (!confirm(`Delete ID ${id}?`)) {
+            return;
+        }
+
+
+        try {
+
+            const res = await fetch(
+                `${API}/${id}?nguoi_xoa=${encodeURIComponent(getUsername())}`,
+                {
+                    method: 'DELETE',
+                    headers: getHeaders()
+                }
+            );
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.detail || 'Delete failed');
+            }
+
+            showToast(dict.staffDeleteSuccess, 'success');
+
+            loadList();
+
+        } catch (err) {
+
+            console.error(err);
+
+            showToast(err.message, 'error');
+        }
+    }
+
+    // ─────────────────────────────────────────────
+    // FORMAT DATETIME
+    // ─────────────────────────────────────────────
+    function formatDateTimeLocal(value) {
+
+        if (!value) return '';
+
+        return value.substring(0, 16);
+    }
+
+    // ─────────────────────────────────────────────
+    // RETURN
+    // ─────────────────────────────────────────────
+    return {
+        loadList,
+        refresh,
+        search,
+        goPage,
+        openAdd,
+        openEdit,
+        save,
+        delete: del
+    };
+
 })();
 
-// Khởi động khi module được active
-document.addEventListener('DOMContentLoaded', () => KiemTra.loadList());
+// ─────────────────────────────────────────────
+// AUTO LOAD
+// ─────────────────────────────────────────────
+$(document).ready(function () {
+
+    KiemTra.loadList();
+
+});

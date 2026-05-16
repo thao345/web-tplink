@@ -187,6 +187,7 @@
                 id="kt-search-inspector"
                 style="width: 160px"
                 onkeyup="if (event.key === 'Enter') KiemTra.loadList();"
+                placeholder="Tìm theo mã nhân viên..."
               />
               <button
                 class="btn-sm-custom btn-blue"
@@ -205,13 +206,13 @@
               </button>
               <div class="toolbar-sep"></div>
               <div style="position: relative">
-                <button
+                <!-- <button
                   class="btn-sm-custom btn-outline"
                   onclick="toggleColMenu('col-menu-time')"
                 >
                   <i class="fas fa-columns"></i>
                   <span data-i18n="columns">Cột</span>
-                </button>
+                </button> -->
                 <div class="col-toggle-dropdown" id="col-menu-time">
                   <div class="col-toggle-item">
                     <input
@@ -289,30 +290,30 @@
                 <span data-i18n="export">Xuất Excel</span>
               </button>
             </div>
+            <div style="margin-bottom: 10px">
+              <button
+                onclick="KiemTra.refresh()"
+                class="btn-refresh"
+                data-i18n="refresh"
+              >
+                <i class="fas fa-sync-alt"></i>
+                Load lại
+              </button>
+            </div>
 
             <div class="table-container" style="position: relative">
               <table class="data-table" id="table-time">
                 <thead>
                   <tr>
-                    <th
-                      style="width: 50px"
-                      class="sortable"
-                      onclick="KiemTra.sort('id')"
-                    >
+                    <th style="width: 50px" class="sortable" onclick="">
                       <span data-i18n="colSeq">STT</span>
                       <i class="fas fa-sort sort-icon"></i>
                     </th>
-                    <th
-                      class="sortable"
-                      onclick="KiemTra.sort('thoi_gian_he_thong')"
-                    >
+                    <th class="sortable" onclick="">
                       <span data-i18n="colSysTime">Thời Gian Hệ Thống</span>
                       <i class="fas fa-sort sort-icon"></i>
                     </th>
-                    <th
-                      class="sortable"
-                      onclick="KiemTra.sort('thoi_gian_bat_dau')"
-                    >
+                    <th class="sortable" onclick="">
                       <span data-i18n="colStartTime">Thời Gian Bắt Đầu</span>
                       <i class="fas fa-sort-up sort-icon"></i>
                     </th>
@@ -728,6 +729,24 @@
               白班巡检时间登记（带 * 为必填项）
             </div>
             <div class="form-row-custom">
+              <div class="form-group-custom">
+                <label data-i18n="colChecker">Mã Kiểm Tra</label>
+                <input
+                  type="text"
+                  id="MaNguoikiemtra-inspector"
+                  readonly
+                  style="background: #f5f5f5"
+                />
+              </div>
+              <div class="form-group-custom">
+                <label data-i18n="colChecker">Người Kiểm Tra</label>
+                <input
+                  type="text"
+                  id="Tenkiemtra-inspector"
+                  readonly
+                  style="background: #f5f5f5"
+                />
+              </div>
               <div class="form-group-custom" style="flex: 1.2">
                 <label
                   ><span class="req">*</span>
@@ -747,21 +766,71 @@
                   ><span class="req">*</span>
                   <span data-i18n="colArea">Khu Vực Tuần Tra</span></label
                 >
-                <select id="audit-area" multiple style="height: 60px">
-                  <option value="负1-1楼">负1-1楼</option>
-                  <option value="2-3楼">2-3楼</option>
-                  <option value="4-5楼">4-5楼</option>
-                  <option value="6-8楼">6-8楼</option>
-                  <option value="9-13楼">9-13楼</option>
-                  <option value="1-4楼">1-4楼</option>
-                  <option value="5-8楼">5-8楼</option>
-                  <option value="其他">其他</option>
-                </select>
+                <div class="multi-select">
+                  <div class="multi-select-box" onclick="toggleAreaDropdown()">
+                    <input
+                      type="text"
+                      id="audit-area-text"
+                      placeholder="Chọn khu vực kiểm tra..."
+                      data-i18n-placeholder="auditAreaPlaceholder"
+                      readonly
+                    />
+                    <i class="fas fa-chevron-down"></i>
+                  </div>
+
+                  <div class="multi-select-dropdown" id="audit-area-dropdown">
+                    <label>
+                      <input type="checkbox" value="负1-1楼" />
+                      负1-1楼
+                    </label>
+
+                    <label>
+                      <input type="checkbox" value="2-3楼" />
+                      2-3楼
+                    </label>
+
+                    <label>
+                      <input type="checkbox" value="4-5楼" />
+                      4-5楼
+                    </label>
+
+                    <label>
+                      <input type="checkbox" value="6-8楼" />
+                      6-8楼
+                    </label>
+
+                    <label>
+                      <input type="checkbox" value="9-13楼" />
+                      9-13楼
+                    </label>
+
+                    <label>
+                      <input type="checkbox" value="1-4楼" />
+                      1-4楼
+                    </label>
+
+                    <label>
+                      <input type="checkbox" value="5-8楼" />
+                      5-8楼
+                    </label>
+
+                    <label>
+                      <input type="checkbox" value="其他" />
+                      其他
+                    </label>
+                  </div>
+                </div>
               </div>
               <div class="form-group-custom">
                 <label data-i18n="colRemark">Ghi Chú</label>
-                <input type="text" id="audit-remark" />
+                <textarea id="audit-remark" rows="1"></textarea>
               </div>
+            </div>
+            <div class="center-btn">
+              <button class="btn-modal btn-modal-save" onclick="KiemTra.save()">
+                <i class="fas fa-save" style="margin-right: 5px"></i>
+                <span data-i18n="save">Lưu</span>
+              </button>
             </div>
           </div>
 
@@ -814,6 +883,16 @@
                   <textarea id="improve-remark" rows="2"></textarea>
                 </div>
               </div>
+
+              <div class="center-btn">
+                <button
+                  class="btn-modal btn-modal-save"
+                  onclick="CaiThien.save()"
+                >
+                  <i class="fas fa-save" style="margin-right: 5px"></i>
+                  <span data-i18n="save">Lưu</span>
+                </button>
+              </div>
             </div>
 
             <!-- RIGHT: Vi phạm -->
@@ -823,32 +902,18 @@
               </div>
               <div class="form-row-custom">
                 <div class="form-group-custom">
-                  <label data-i18n="colDept">Bộ Phận</label>
-                  <select id="vio-dept">
-                    <option value="">-- Chọn --</option>
-                    <option>SMT</option>
-                    <option>备品库</option>
-                    <option>维修</option>
-                    <option>特制课</option>
-                    <option>工程部</option>
-                    <option>IQC</option>
-                    <option>品管部</option>
-                    <option>网管</option>
-                  </select>
+                  <label data-i18n="colDept">Bộ Phận vi phạm</label>
+                  <input type="text" id="vio-dept" />
                 </div>
                 <div class="form-group-custom">
-                  <label data-i18n="colEmpId">Mã NV</label>
-                  <select id="vio-empid">
-                    <option value="">-- Chọn --</option>
-                  </select>
+                  <label data-i18n="colEmpId">Mã NV vi phạm</label>
+                  <input type="text" id="vio-empid" />
                 </div>
               </div>
               <div class="form-row-custom">
                 <div class="form-group-custom">
-                  <label data-i18n="colName">Họ Tên</label>
-                  <select id="vio-name">
-                    <option value="">-- Chọn --</option>
-                  </select>
+                  <label data-i18n="colName">Họ Tên vi phạm</label>
+                  <input type="text" id="vio-name" />
                 </div>
                 <div class="form-group-custom">
                   <label data-i18n="colVioTime">Thời Gian Vi Phạm</label>
@@ -864,15 +929,11 @@
               <div class="form-row-custom">
                 <div class="form-group-custom">
                   <label data-i18n="colSuperior">Cấp Trên</label>
-                  <select id="vio-superior">
-                    <option value="">-- Chọn --</option>
-                  </select>
+                  <input type="text" id="vio-superior" />
                 </div>
                 <div class="form-group-custom">
                   <label data-i18n="colCCMail">CC Email</label>
-                  <select id="vio-cc">
-                    <option value="">-- Chọn --</option>
-                  </select>
+                  <input type="text" id="vio-superior" id="vio-cc" />
                 </div>
               </div>
               <div class="form-row-custom">
@@ -881,14 +942,23 @@
                   <textarea id="vio-phenomenon" rows="3"></textarea>
                 </div>
               </div>
+              <div class="center-btn">
+                <button
+                  class="btn-modal btn-modal-save"
+                  onclick="ViPham.save()"
+                >
+                  <i class="fas fa-save" style="margin-right: 5px"></i>
+                  <span data-i18n="save">Lưu</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
         <div class="modal-footer-custom">
-          <button class="btn-modal btn-modal-save" onclick="KiemTra.save()">
+          <!-- <button class="btn-modal btn-modal-save" onclick="KiemTra.save()">
             <i class="fas fa-save" style="margin-right: 5px"></i>
             <span data-i18n="save">Lưu</span>
-          </button>
+          </button> -->
           <button
             class="btn-modal btn-modal-cancel"
             onclick="closeModal('modal-audit')"
@@ -1257,6 +1327,29 @@
       </div>
     </div>
 
+     <!-- ══ MODAL: Xác nhận xóa ══════════════════════════════════ -->
+    <div class="confirm-overlay" id="confirmDelete">
+      <div class="confirm-box">
+        <div class="confirm-icon">
+          <i class="fas fa-trash-alt"></i>
+        </div>
+
+        <div class="confirm-title">Xác nhận xóa</div>
+
+        <div class="confirm-text" id="confirmDeleteText">
+          Bạn có chắc muốn xóa?
+        </div>
+
+        <div class="confirm-actions">
+          <button class="btn-confirm-cancel" onclick="closeDeleteConfirm()">
+            Hủy
+          </button>
+
+          <button class="btn-confirm-delete" id="confirmDeleteBtn">Xóa</button>
+        </div>
+      </div>
+    </div>
+
     <!-- ══ MODAL: Xác nhận xóa ══════════════════════════════════ -->
     <div class="modal-overlay" id="modal-confirm-delete">
       <div class="modal-box" style="width: 400px">
@@ -1478,6 +1571,36 @@
         /* Load module mặc định */
         if (typeof KiemTra !== "undefined") KiemTra.loadList();
       });
+
+      // custom select
+      function toggleAreaDropdown() {
+        const el = document.getElementById("audit-area-dropdown");
+
+        el.style.display = el.style.display === "block" ? "none" : "block";
+      }
+
+      // update textbox
+      document.querySelectorAll("#audit-area-dropdown input").forEach((cb) => {
+        cb.addEventListener("change", () => {
+          const values = [
+            ...document.querySelectorAll("#audit-area-dropdown input:checked"),
+          ].map((x) => x.value);
+
+          document.getElementById("audit-area-text").value = values.join(", ");
+        });
+      });
+
+      // click outside -> close
+      document.addEventListener("click", function (e) {
+        const wrapper = document.querySelector(".multi-select");
+
+        if (!wrapper.contains(e.target)) {
+          document.getElementById("audit-area-dropdown").style.display = "none";
+        }
+      });
     </script>
+
+   
+    
   </body>
 </html>
