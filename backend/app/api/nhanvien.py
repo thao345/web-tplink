@@ -46,7 +46,7 @@ def api_get_nhanvien_by_id(ma_nv: str):
         )
 
     return {
-        "success": True,
+        "success": True, 
         "data": data
     }
 

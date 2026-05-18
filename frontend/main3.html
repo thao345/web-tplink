@@ -342,6 +342,15 @@
           <!-- ══ MODULE 2: 要改善项目登记 ════════════════════════ -->
           <div class="module-panel" id="mod-improve">
             <div class="toolbar">
+              <span class="toolbar-label" data-i18n="keyword">Từ khóa:</span>
+              <input
+                type="text"
+                id="ct-keyword"
+                style="width: 200px"
+                placeholder="Nhập mã nv, họ tên, hiện tượng..."
+                data-i18n-placeholder="placeholderSearchCaithien"
+                onkeyup="if (event.key === 'Enter') CaiThien.loadList();"
+              />
               <span class="toolbar-label" data-i18n="date">Ngày:</span>
               <input type="date" id="ct-from" style="width: 140px" />
               <span style="font-size: 12px; color: var(--text-muted)">đến</span>
@@ -354,20 +363,17 @@
                 <span data-i18n="search">Tìm kiếm</span>
               </button>
               <div class="toolbar-sep"></div>
-              <button
-                class="btn-sm-custom btn-green"
-                onclick="CaiThien.openAdd()"
-              >
-                <i class="fas fa-plus"></i>
-                <span data-i18n="addNew">+ Thêm mới</span>
-              </button>
+
               <div class="toolbar-sep"></div>
+            </div>
+            <div style="margin-bottom: 10px">
               <button
-                class="btn-sm-custom btn-orange"
-                onclick="exportExcel('cai-thien')"
+                onclick="CaiThien.refresh()"
+                class="btn-refresh"
+                data-i18n="refresh"
               >
-                <i class="fas fa-file-excel"></i>
-                <span data-i18n="export">Xuất Excel</span>
+                <i class="fas fa-sync-alt"></i>
+                Load lại
               </button>
             </div>
 
@@ -378,20 +384,17 @@
                     <th style="width: 50px">
                       <span data-i18n="colSeq">STT</span>
                     </th>
-                    <th
-                      class="sortable"
-                      onclick="CaiThien.sort('ngay_kiem_tra')"
-                    >
-                      <span data-i18n="colDate">Ngày</span>
+                    <th><span data-i18n="colChecker">Người Kiểm Tra</span></th>
+                    <th class="sortable">
+                      <span data-i18n="colDate">Ngày kiểm tra</span>
                       <i class="fas fa-sort sort-icon"></i>
-                    </th>
-                    <th>
-                      <span data-i18n="colIssue">Hiện Tượng Cần Cải Thiện</span>
                     </th>
                     <th>
                       <span data-i18n="colDept">BP Phụ Trách Khu Vực</span>
                     </th>
-                    <th><span data-i18n="colChecker">Người Kiểm Tra</span></th>
+                    <th>
+                      <span data-i18n="colIssue">Hiện Tượng Cần Cải Thiện</span>
+                    </th>
                     <th><span data-i18n="colRemark">Ghi Chú</span></th>
                     <th style="width: 70px">
                       <span data-i18n="colActions">Thao Tác</span>
@@ -1117,9 +1120,8 @@
               <select id="ct-dept">
                 <option value="">--</option>
                 <option>外销生产</option>
-                <option>SMT</option>
-                <option>维修</option>
-                <option>品管部</option>
+                <option>外销工程</option>
+                <option>外销品管</option>            
                 <option>其他</option>
               </select>
             </div>
@@ -1327,7 +1329,7 @@
       </div>
     </div>
 
-     <!-- ══ MODAL: Xác nhận xóa ══════════════════════════════════ -->
+    <!-- ══ MODAL: Xác nhận xóa ══════════════════════════════════ -->
     <div class="confirm-overlay" id="confirmDelete">
       <div class="confirm-box">
         <div class="confirm-icon">
@@ -1599,8 +1601,5 @@
         }
       });
     </script>
-
-   
-    
   </body>
 </html>

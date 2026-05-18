@@ -22,6 +22,9 @@ app.include_router(nhanvien_router)
 from app.api.thoigian_kiemtra import router as thoigian_kiemtra_router
 app.include_router(thoigian_kiemtra_router)
 
+from app.api.caithien import router as caithien_router
+app.include_router(caithien_router)
+
 # 👉 test server sống hay chết
 # @app.get("/ping")
 # def ping():

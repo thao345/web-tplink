@@ -1,6 +1,6 @@
 from app.core.db import get_connection
 
-
+ 
 # ==============================
 # GET LIST
 # ==============================

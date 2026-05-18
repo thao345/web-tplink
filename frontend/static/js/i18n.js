@@ -17,7 +17,7 @@ const i18n = {
     search: '查询', addNew: '新增', columns: '列', export: '导出', save: '保存', close: '关闭',
     colSeq: '序号', colSysTime: '系统记录时间', colStartTime: '开始时间', colEndTime: '结束时间',
     colArea: '巡检区域', colInspector2: '巡检人员', colRemark: '备注', colActions: '操作',
-    colDate: '日期', colIssue: '需改善现象', colDept: '违纪部门', colDeptResp: '检查区域负责部门',
+    colDate: '检查日期', colIssue: '需改善现象', colDept: '违纪部门', colDeptResp: '检查区域负责部门',
     colChecker: '检查人', colEmpId: '违纪工号', colName: '违纪姓名', colVioTime: '违纪时间',
     colLocation: '发生地点', colVioType: '违纪现象', colPunish: '处罚措施',
     colSuperior: '上级领导', colCCMail: '邮件抄送', colStatus: '关闭状态',
@@ -86,6 +86,9 @@ const i18n = {
     staffSaveSuccess: '保存成功',
     staffSaveFail: '保存失败',
 
+    //caithien
+    placeholderSearchCaithien: '请输入员工编号、姓名和症状...', 
+
   },
   vi: {
     saveSuccess: 'Lưu thành công',
@@ -100,7 +103,7 @@ const i18n = {
     search: 'Tìm kiếm', addNew: 'Thêm mới', columns: 'Cột', export: 'Xuất Excel', save: 'Lưu', close: 'Đóng',
     colSeq: 'STT', colSysTime: 'Thời Gian Hệ Thống', colStartTime: 'Thời Gian Bắt Đầu', colEndTime: 'Thời Gian Kết Thúc',
     colArea: 'Khu Vực Tuần Tra', colInspector2: 'Người Tuần Tra', colRemark: 'Ghi Chú', colActions: 'Thao Tác',
-    colDate: 'Ngày', colIssue: 'Hiện Tượng Cần Cải Thiện', colDept: 'Bộ Phận vi phạm', colDeptResp: 'BP Phụ Trách Khu Vực',
+    colDate: 'Ngày kiểm tra', colIssue: 'Hiện Tượng Cần Cải Thiện', colDept: 'Bộ Phận vi phạm', colDeptResp: 'BP Phụ Trách Khu Vực',
     colChecker: 'Người Kiểm Tra', colEmpId: 'Mã NV vi phạm', colName: 'Họ Tên vi phạm', colVioTime: 'Thời Gian Vi Phạm',
     colLocation: 'Địa Điểm', colVioType: 'Hiện Tượng Vi Phạm', colPunish: 'Biện Pháp Xử Phạt',
     colSuperior: 'Cấp Trên', colCCMail: 'CC Email', colStatus: 'Trạng Thái',
@@ -168,6 +171,9 @@ const i18n = {
 
     staffSaveSuccess: 'Lưu thành công',
     staffSaveFail: 'Lỗi lưu dữ liệu',
+
+    //caithien
+    placeholderSearchCaithien: 'Nhập mã nv, họ tên, hiện tượng...', 
   },
   en: {
     saveSuccess: 'Saved successfully',
@@ -182,7 +188,7 @@ const i18n = {
     search: 'Search', addNew: 'Add New', columns: 'Columns', export: 'Export', save: 'Save', close: 'Close',
     colSeq: 'No.', colSysTime: 'System Time', colStartTime: 'Start Time', colEndTime: 'End Time',
     colArea: 'Inspection Area', colInspector2: 'Inspector', colRemark: 'Remark', colActions: 'Actions',
-    colDate: 'Date', colIssue: 'Issue to Improve', colDept: 'Violation Department', colDeptResp: 'Responsible Dept',
+    colDate: 'Inspection date', colIssue: 'Issue to Improve', colDept: 'Violation Department', colDeptResp: 'Responsible Dept',
     colChecker: 'Checker', colEmpId: 'Violation Employee ID', colName: 'Violation Employee Name', colVioTime: 'Violation Time',
     colLocation: 'Location', colVioType: 'Violation Type', colPunish: 'Punishment',
     colSuperior: 'Superior', colCCMail: 'CC Email', colStatus: 'Status',
@@ -249,6 +255,9 @@ const i18n = {
 
     staffSaveSuccess: 'Saved successfully',
     staffSaveFail: 'Save failed',
+
+     //caithien
+    placeholderSearchCaithien: 'Enter employee code, full name, and symptom...', 
 
   }
 };

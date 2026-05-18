@@ -1,0 +1,22 @@
+Project Setup Guide
+Step 1
+: Install Required Packages
+Run the requirements.txt file to install all required packages for the project.
+Command:
+pip install -r requirements.txt
+
+Step 2:
+Create Database and Stored Procedures
+Open SQL Server and run the following files in order:
+01_create_dataabase_new.sql
+02_stored_procedures.sql
+
+Step 3: 
+Run the FastAPI Backend
+Open a terminal in the backend folder, then run the following command:
+
+uvicorn app.main:app --reload
+
+After running successfully, the server will be available at:
+
+http://127.0.0.1:8000

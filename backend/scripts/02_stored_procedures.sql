@@ -511,11 +511,11 @@ EXEC dbo.SP_KiemTra_Export
 -- ============================================================
 -- SP_CAI_THIEN: Improvement Items
 -- ============================================================
--- có tìm theo keyword hiện tượng mô tả, lọc filter ngày kiểm tra, tìm theo mã nv 
+-- có tìm theo keyword hiện tượng mô tả và mã nv, tên nv, lọc filter ngày kiểm tra
 CREATE OR ALTER PROCEDURE dbo.SP_CaiThien_GetList
     @tu_ngay    DATE          = NULL,
     @den_ngay   DATE          = NULL,
-    @ma_nv      NVARCHAR(20)  = NULL,
+    @keyword    NVARCHAR(200) = NULL,
     @page       INT           = 1,
     @page_size  INT           = 25
 AS
@@ -543,7 +543,13 @@ BEGIN
 
     WHERE (@tu_ngay  IS NULL OR ct.ngay_kiem_tra >= @tu_ngay)
       AND (@den_ngay IS NULL OR ct.ngay_kiem_tra <= @den_ngay)
-      AND (@ma_nv    IS NULL OR ct.ma_nv_kiem_tra = @ma_nv)
+   
+      AND (
+            NULLIF(LTRIM(RTRIM(@keyword)), '') IS NULL
+            OR ct.ma_nv_kiem_tra LIKE N'%' + @keyword + N'%'
+			OR nv.ho_ten LIKE N'%' + @keyword + N'%'
+            OR ct.hien_tuong LIKE N'%' + @keyword + N'%'     
+          )
 
     ORDER BY
         ct.ngay_tao DESC,
@@ -554,13 +560,43 @@ BEGIN
 END;
 GO
 EXEC dbo.SP_CaiThien_GetList
-    @ma_nv = '30000176';
+    @keyword = N'东'; -- theo mã nv, tên nv, hiện tượng
 EXEC dbo.SP_CaiThien_GetList
     @tu_ngay = '2026-05-01',
     @den_ngay = '2026-05-31';
 EXEC dbo.SP_CaiThien_GetList
-    @page = 2,
+    @page = 1,
     @page_size = 10;
+
+CREATE OR ALTER PROCEDURE dbo.SP_CaiThien_GetById
+    @id INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT TOP 1
+        ct.id,
+
+        ct.id_kiem_tra,
+		ct.ma_nv_kiem_tra,
+        nv.ho_ten AS ten_nguoi_kiem_tra,
+
+        ct.ngay_kiem_tra,
+        ct.ten_bo_phan_phu_trach,
+		ct.hien_tuong,
+      
+        ct.ghi_chu,
+        ct.ngay_tao
+
+    FROM dbo.HANG_MUC_CAI_THIEN ct
+
+    LEFT JOIN dbo.NHAN_VIEN nv
+        ON nv.ma_nv = ct.ma_nv_kiem_tra
+
+    WHERE ct.id = @id;
+END;
+GO
+EXEC dbo.SP_CaiThien_GetById @id = 4;
 
 CREATE OR ALTER PROCEDURE dbo.SP_CaiThien_Insert
     @id_kiem_tra            INT           = NULL,
